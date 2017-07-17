@@ -24,7 +24,7 @@ compute histograms.
 Example
 -------
 
-Here's an example of binning 10 million points into a regular 2D histogram::
+Here's an example of binning 10 million points into a regular 2D histogram:
 
     In [1]: import numpy as np
 
