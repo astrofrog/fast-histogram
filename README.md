@@ -6,10 +6,15 @@ nonsense. [Numpy's](http://www.numpy.org) histogram functions are versatile,
 and can handle for example non-regular binning, but this versatility comes at
 the expense of performance.
 
-This mini-package aims to provide simple and fast histogram functions that don't
-compromise on performance. It doesn't do anything complicated - it just
-implements a simple histogram algorithm in Cython and keeps it simple. The aim
-is to have functions that are fast but also robust and reliable.
+The **fast-histogram** mini-package aims to provide simple and fast histogram
+functions that don't compromise on performance. It doesn't do anything
+complicated - it just implements a simple histogram algorithm in Cython and
+keeps it simple. The aim is to have functions that are fast but also robust and
+reliable.
+
+To install:
+
+    pip install fast-histogram
 
 Why make a package specifically for this rather than just including Cython code
 in packages that need it? The main motivation is to avoid making pure-Python
