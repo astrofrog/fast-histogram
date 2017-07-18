@@ -72,6 +72,11 @@ if it is possible to use Numpy in a smarter way to get the same
 performance gains, please open an issue and I'll consider deprecating
 this package :)
 
+One package that does include fast histogram functions (including in
+n-dimensions) and can compute other statistics is
+[vaex](https://github.com/maartenbreddels/vaex), so take a look there
+if you need more advanced functionality!
+
 Are the 2D histograms not transposed compared to what they should be?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
