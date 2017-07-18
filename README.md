@@ -46,7 +46,7 @@ In [6]: %timeit _ = histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)
 The version here is over 20 times faster! The following plot shows the
 speedup as a function of array size for the bin parameters shown above:
 
-![speedup_compared](speedup_compared.png)
+![speedup_compared](https://github.com/astrofrog/fast-histogram/raw/master/speedup_compared.png)
 
 as well as results for the 1D case, also with 30 bins. The speedup for the 2D
 case is consistently between 20-25x, and for the 1D case goes from 15x for small
