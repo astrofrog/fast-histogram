@@ -2,7 +2,7 @@ from __future__ import division
 
 import numpy as np
 
-from .histogram_cython import histogram1d_cython, histogram2d_cython
+from ._histogram_core import _histogram1d, _histogram2d
 
 __all__ = ['histogram1d', 'histogram2d']
 
@@ -13,8 +13,8 @@ def histogram1d(x, nx, xmin, xmax):
 
     Parameters
     ----------
-    x, y : `~numpy.ndarray`
-        The positon of the points to bin in the 1D histogram
+    x : `~numpy.ndarray`
+        The position of the points to bin in the 1D histogram
     nx : int
         The number of bins in the x direction
     xmin, xmax : float, optional
@@ -40,7 +40,7 @@ def histogram1d(x, nx, xmin, xmax):
 
     x = np.asarray(x, np.float)
 
-    return histogram1d_cython(x, nx, xmin, xmax)
+    return _histogram1d(x, nx, xmin, xmax)
 
 
 def histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax):
@@ -50,7 +50,7 @@ def histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax):
     Parameters
     ----------
     x, y : `~numpy.ndarray`
-        The positon of the points to bin in the 2D histogram
+        The position of the points to bin in the 2D histogram
     nx : int
         The number of bins in the x direction
     xmin, xmax : float, optional
@@ -93,4 +93,4 @@ def histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax):
     x = np.asarray(x, np.float)
     y = np.asarray(y, np.float)
 
-    return histogram2d_cython(x, y, nx, xmin, xmax, ny, ymin, ymax)
+    return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
