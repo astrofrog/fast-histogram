@@ -50,18 +50,12 @@ MOD_INIT(_histogram_core)
 static PyObject *_histogram1d(PyObject *self, PyObject *args)
 {
 
-    int n, nx;
-    double xmin, xmax;
+    long i, n;
+    int ix, nx;
+    double xmin, xmax, tx, fnx, normx;
     PyObject *x_obj, *x_array, *count_array;
     npy_intp dims[1];
-
-    double *x;
-    double *count;
-
-    int i, ix;
-    double tx;
-    double fnx;
-    double normx;
+    double *x, *count;
 
     /* Parse the input tuple */
     if (!PyArg_ParseTuple(args, "Oidd", &x_obj, &nx, &xmin, &xmax)) {
@@ -80,7 +74,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
     }
 
     /* How many data points are there? */
-    n = (int)PyArray_DIM(x_array, 0);
+    n = (long)PyArray_DIM(x_array, 0);
 
     /* Build the output array */
     dims[0] = nx;
@@ -124,21 +118,12 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
 static PyObject *_histogram2d(PyObject *self, PyObject *args)
 {
 
-    int n, nx, ny;
-    double xmin, xmax, ymin, ymax;
+    long i, n;
+    int ix, iy, nx, ny;
+    double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy;
     PyObject *x_obj, *y_obj, *x_array, *y_array, *count_array;
     npy_intp dims[2];
-
-    double *x;
-    double *y;
-    double *count;
-
-    int i, ix, iy;
-    double tx, ty;
-    double fnx;
-    double fny;
-    double normx;
-    double normy;
+    double *x, *y, *count;
 
     /* Parse the input tuple */
     if (!PyArg_ParseTuple(args, "OOiddidd", &x_obj, &y_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax)) {
@@ -159,10 +144,10 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
     }
 
     /* How many data points are there? */
-    n = (int)PyArray_DIM(x_array, 0);
+    n = (long)PyArray_DIM(x_array, 0);
 
     /* Check the dimensions. */
-    if (n != (int)PyArray_DIM(y_array, 0)) {
+    if (n != (long)PyArray_DIM(y_array, 0)) {
         PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x and y");
         Py_DECREF(x_array);
         Py_DECREF(y_array);
