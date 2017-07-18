@@ -100,7 +100,7 @@ def histogram2d(x, y, bins, range):
     if ny <= 0:
         raise ValueError("ny should be strictly positive")
 
-    x = np.asarray(x, np.float)
-    y = np.asarray(y, np.float)
+    x = np.ascontiguousarray(x, np.float)
+    y = np.ascontiguousarray(y, np.float)
 
     return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)

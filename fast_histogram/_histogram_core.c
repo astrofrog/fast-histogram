@@ -198,7 +198,7 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
       tx = x[i];
       ty = y[i];
 
-      if ((tx >= xmin) && (tx <= xmax) && (ty >= ymin) && (ty <= ymax)) {
+      if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
           ix = (tx - xmin) * normx * fnx;
           iy = (ty - ymin) * normy * fny;
           count[iy + ny * ix] += 1.;
