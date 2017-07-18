@@ -65,7 +65,7 @@ Q&A
 ---
 
 Doesn't package  already do this, but better?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This may very well be the case! If this duplicates another package, or
 if it is possible to use Numpy in a smarter way to get the same
