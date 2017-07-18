@@ -23,7 +23,7 @@ To install:
 The ``fast_histogram`` module then provides two functions:
 ``histogram1d`` and ``histogram2d``:
 
-::
+.. code:: python
 
     from fast_histogram import histogram1d, histogram2d
 
@@ -53,9 +53,7 @@ The version here is over 20 times faster! The following plot shows the
 speedup as a function of array size for the bin parameters shown above:
 
 .. figure:: https://github.com/astrofrog/fast-histogram/raw/master/speedup_compared.png
-   :alt: speedup\_compared
-
-   speedup\_compared
+   :alt: Comparison of performance between Numpy and fast-histogram
 
 as well as results for the 1D case, also with 30 bins. The speedup for
 the 2D case is consistently between 20-25x, and for the 1D case goes
@@ -64,7 +62,7 @@ from 15x for small arrays to around 7x for large arrays.
 Q&A
 ---
 
-Doesn't package  already do this, but better?
+Doesn't package X already do this, but better?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This may very well be the case! If this duplicates another package, or
@@ -94,8 +92,8 @@ Why not use Cython?
 I originally implemented this in Cython, but found that I could get a
 50% performance improvement by going straight to a C extension.
 
-What about using Numba?\*\*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+What about using Numba?
+~~~~~~~~~~~~~~~~~~~~~~~
 
 I specifically want to keep this package as easy as possible to install,
 and while `Numba <https://numba.pydata.org>`__ is a great package, it is
