@@ -8,7 +8,7 @@ environment:
                         # of 32 bit and 64 bit builds are needed, move this
                         # to the matrix section.
 
-      CONDA_DEPENDENCIES: "cython numpy pytest nomkl"
+      CONDA_DEPENDENCIES: "cython numpy pytest"
       PIP_DEPENDENCIES: "hypothesis[numpy]"
 
   matrix:
