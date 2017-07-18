@@ -88,6 +88,16 @@ should give the same result as:
 
     fast_histogram.histogram2d(x, y, range=[[xmin, xmax], [ymin, ymax]], bins=[nx, ny])
 
+Why not contribute this to Numpy directly?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As mentioned above, the Numpy functions are much more versatile, so they could not
+be replaced by the ones here. One option would be to check in Numpy's functions for
+cases that are simple and dispatch to functions such as the ones here, or add
+dedicated functions for regular binning. I hope we can get this in Numpy in some form
+or another eventually, but for now, the aim is to have this available to packages
+that need to support a range of Numpy versions.
+
 Why not use Cython?
 ~~~~~~~~~~~~~~~~~~~
 
