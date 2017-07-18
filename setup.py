@@ -16,6 +16,6 @@ setup(name='fast-histogram',
       author='Thomas Robitaille',
       author_email='thomas.robitaille@gmail.com',
       license='BSD',
-      url='https://github.com/astrofrog/fastogram',
+      url='https://github.com/astrofrog/fast-histogram',
       packages=['fast_histogram', 'fast_histogram.tests'],
       ext_modules=extensions)
