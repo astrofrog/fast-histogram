@@ -43,7 +43,7 @@ def histogram1d(x, bins, range):
     if nx <= 0:
         raise ValueError("nx should be strictly positive")
 
-    x = np.asarray(x, np.float)
+    x = np.ascontiguousarray(x, np.float)
 
     return _histogram1d(x, nx, xmin, xmax)
 
