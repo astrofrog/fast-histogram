@@ -10,13 +10,17 @@ the expense of performance.
 
 The **fast-histogram** mini-package aims to provide simple and fast histogram
 functions that don't compromise on performance. It doesn't do anything
-complicated - it just implements a simple histogram algorithm in Cython and
-keeps it simple. The aim is to have functions that are fast but also robust and
-reliable.
+complicated - it just implements a simple histogram algorithm in C and keeps it
+simple. The aim is to have functions that are fast but also robust and reliable.
 
 To install:
 
     pip install fast-histogram
+
+The ``fast_histogram`` module then provides two functions: ``histogram1d`` and
+``histogram2d``:
+
+    from fast_histogram import histogram1d, histogram2d
 
 Example
 -------

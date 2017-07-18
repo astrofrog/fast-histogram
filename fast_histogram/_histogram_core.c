@@ -50,16 +50,28 @@ MOD_INIT(_histogram_core)
 static PyObject *_histogram1d(PyObject *self, PyObject *args)
 {
 
-    int nx;
+    int n, nx;
     double xmin, xmax;
-    PyObject *x_obj;
+    PyObject *x_obj, *x_array, *count_array;
+    npy_intp dims[1];
+
+    double *x;
+    double *count;
+
+    int i, ix;
+    double tx;
+    double fnx;
+    double normx;
+
 
     /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "Oldd", &x_obj, &nx, &xmin, &xmax))
+    if (!PyArg_ParseTuple(args, "Oidd", &x_obj, &nx, &xmin, &xmax)) {
+        PyErr_SetString(PyExc_TypeError, "Error parsing input");
         return NULL;
+    }
 
     /* Interpret the input objects as `numpy` arrays. */
-    PyObject *x_array = PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_IN_ARRAY);
+    x_array = PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_IN_ARRAY);
 
     /* If that didn't work, throw an `Exception`. */
     if (x_array == NULL) {
@@ -69,12 +81,11 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
     }
 
     /* How many data points are there? */
-    int n = (int)PyArray_DIM(x_array, 0);
+    n = (int)PyArray_DIM(x_array, 0);
 
     /* Build the output array */
-    npy_intp dims[1];
     dims[0] = nx;
-    PyObject *count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
     if (count_array == NULL) {
         PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
         Py_DECREF(x_array);
@@ -85,13 +96,12 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
     PyArray_FILLWBYTE(count_array, 0);
 
     /* Get pointers to the data as C-types. */
-    double *x = (double*)PyArray_DATA(x_array);
-    double *count = (double*)PyArray_DATA(count_array);
 
-    int i, ix;
-    double tx;
-    double fnx = nx;
-    double normx = 1. / (xmax - xmin);
+    x = (double*)PyArray_DATA(x_array);
+    count = (double*)PyArray_DATA(count_array);
+
+    fnx = nx;
+    normx = 1. / (xmax - xmin);
 
     for(i = 0; i < n; i++) {
 
@@ -115,17 +125,31 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
 static PyObject *_histogram2d(PyObject *self, PyObject *args)
 {
 
-    int nx, ny;
+    int n, nx, ny;
     double xmin, xmax, ymin, ymax;
-    PyObject *x_obj, *y_obj;
+    PyObject *x_obj, *y_obj, *x_array, *y_array, *count_array;
+    npy_intp dims[2];
+
+    double *x;
+    double *y;
+    double *count;
+
+    int i, ix, iy;
+    double tx, ty;
+    double fnx;
+    double fny;
+    double normx;
+    double normy;
 
     /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "OOlddldd", &x_obj, &y_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax))
+    if (!PyArg_ParseTuple(args, "OOiddidd", &x_obj, &y_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax)) {
+        PyErr_SetString(PyExc_TypeError, "Error parsing input");
         return NULL;
+    }
 
     /* Interpret the input objects as `numpy` arrays. */
-    PyObject *x_array = PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_IN_ARRAY);
-    PyObject *y_array = PyArray_FROM_OTF(y_obj, NPY_DOUBLE, NPY_IN_ARRAY);
+    x_array = PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_IN_ARRAY);
+    y_array = PyArray_FROM_OTF(y_obj, NPY_DOUBLE, NPY_IN_ARRAY);
 
     /* If that didn't work, throw an `Exception`. */
     if (x_array == NULL || y_array == NULL) {
@@ -136,7 +160,7 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
     }
 
     /* How many data points are there? */
-    int n = (int)PyArray_DIM(x_array, 0);
+    n = (int)PyArray_DIM(x_array, 0);
 
     /* Check the dimensions. */
     if (n != (int)PyArray_DIM(y_array, 0)) {
@@ -147,10 +171,10 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
     }
 
     /* Build the output array */
-    npy_intp dims[2];
     dims[0] = ny;
-    dims[0] = nx;
-    PyObject *count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    dims[1] = nx;
+
+    count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     if (count_array == NULL) {
         PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
         Py_DECREF(x_array);
@@ -161,26 +185,24 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
     PyArray_FILLWBYTE(count_array, 0);
 
     /* Get pointers to the data as C-types. */
-    double *x = (double*)PyArray_DATA(x_array);
-    double *y = (double*)PyArray_DATA(y_array);
-    double *count = (double*)PyArray_DATA(count_array);
+    x = (double*)PyArray_DATA(x_array);
+    y = (double*)PyArray_DATA(y_array);
+    count = (double*)PyArray_DATA(count_array);
 
-    int i, ix, iy;
-    double tx, ty;
-    double fnx = nx;
-    double fny = ny;
-    double normx = 1. / (xmax - xmin);
-    double normy = 1. / (ymax - ymin);
+    fnx = nx;
+    fny = ny;
+    normx = 1. / (xmax - xmin);
+    normy = 1. / (ymax - ymin);
 
     for(i = 0; i < n; i++) {
 
       tx = x[i];
-      ty = x[i];
+      ty = y[i];
 
       if ((tx >= xmin) && (tx <= xmax) && (ty >= ymin) && (ty <= ymax)) {
           ix = (tx - xmin) * normx * fnx;
           iy = (ty - ymin) * normy * fny;
-          count[iy, ix] += 1.;
+          count[ix + nx * iy] += 1.;
       }
 
     }
