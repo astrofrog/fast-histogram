@@ -46,13 +46,20 @@ In [6]: %timeit _ = histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)
 The version here is over 20 times faster! The following plot shows the
 speedup as a function of array size for the bin parameters shown above:
 
-![speedup_plot](speedup.png)
+![speedup_compared](speedup_compared.png)
 
-As you can see, for smaller arrays the performance improvement is even larger,
-on the order of 40x.
+as well as results for the 1D case, also with 30 bins. The speedup for the 2D
+case is consistently between 20-25x, and for the 1D case goes from 15x for small
+arrays to around 7x for large arrays.
 
 Q&A
 ---
+
+### Doesn't package <X> already do this, but better?
+
+This may very well be the case! If this duplicates another package, or if it is
+possible to use Numpy in a smarter way to get the same performance gains, please
+open an issue and I'll consider deprecating this package :)
 
 ### Are the 2D histograms not transposed compared to what they should be?
 
