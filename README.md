@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/astrofrog/fast-histogram.svg?branch=master)](https://travis-ci.org/astrofrog/fast-histogram)
+
 About
 -----
 
