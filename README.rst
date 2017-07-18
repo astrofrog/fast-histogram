@@ -3,13 +3,13 @@
 About
 -----
 
-Sometimes you just want to compute simple 1D or 2D histograms. Fast. No
+Sometimes you just want to compute simple 1D or 2D histograms with regular bins. Fast. No
 nonsense. `Numpy's <http://www.numpy.org>`__ histogram functions are
 versatile, and can handle for example non-regular binning, but this
 versatility comes at the expense of performance.
 
 The **fast-histogram** mini-package aims to provide simple and fast
-histogram functions that don't compromise on performance. It doesn't do
+histogram functions for regular bins that don't compromise on performance. It doesn't do
 anything complicated - it just implements a simple histogram algorithm
 in C and keeps it simple. The aim is to have functions that are fast but
 also robust and reliable. The result is a 1D histogram function here that
