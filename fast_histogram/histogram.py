@@ -1,5 +1,7 @@
 from __future__ import division
 
+import numbers
+
 import numpy as np
 
 from ._histogram_core import _histogram1d, _histogram2d
@@ -7,7 +9,7 @@ from ._histogram_core import _histogram1d, _histogram2d
 __all__ = ['histogram1d', 'histogram2d']
 
 
-def histogram1d(x, nx, xmin, xmax):
+def histogram1d(x, bins, range):
     """
     Compute a 1D histogram assuming equally spaced bins.
 
@@ -15,16 +17,19 @@ def histogram1d(x, nx, xmin, xmax):
     ----------
     x : `~numpy.ndarray`
         The position of the points to bin in the 1D histogram
-    nx : int
-        The number of bins in the x direction
-    xmin, xmax : float, optional
-        The range in the x direction
+    bins : int
+        The number of bins
+    range : float, optional
+        The range as a tuple of (xmin, xmax)
 
     Returns
     -------
     array : `~numpy.ndarray`
         The 1D histogram array
     """
+
+    nx = bins
+    xmin, xmax = range
 
     if not np.isfinite(xmin):
         raise ValueError("xmin should be finite")
@@ -43,7 +48,7 @@ def histogram1d(x, nx, xmin, xmax):
     return _histogram1d(x, nx, xmin, xmax)
 
 
-def histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax):
+def histogram2d(x, y, bins, range):
     """
     Compute a 2D histogram assuming equally spaced bins.
 
@@ -51,20 +56,25 @@ def histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax):
     ----------
     x, y : `~numpy.ndarray`
         The position of the points to bin in the 2D histogram
-    nx : int
-        The number of bins in the x direction
-    xmin, xmax : float, optional
-        The range in the x direction
-    ny : int
-        The number of bins in the x direction
-    ymin, ymax : float, optional
-        The range in the x direction
+    bins : int or iterable
+        The number of bins in each dimension. If given as an integer, the same
+        number of bins is used for each dimension.
+    range : iterable
+        The range to use in each dimention, as an iterable of value pairs, i.e.
+        [(xmin, xmax), (ymin, ymax)]
 
     Returns
     -------
     array : `~numpy.ndarray`
         The 2D histogram array
     """
+
+    if isinstance(bins, numbers.Integral):
+        nx = ny = bins
+    else:
+        nx, ny = bins
+
+    (xmin, xmax), (ymin, ymax) = range
 
     if not np.isfinite(xmin):
         raise ValueError("xmin should be finite")

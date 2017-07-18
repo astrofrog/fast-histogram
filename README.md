@@ -35,15 +35,15 @@ In [2]: x = np.random.random(10_000_000)
 In [3]: y = np.random.random(10_000_000)
 
 In [4]: %timeit _ = np.histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)
-1.02 s ± 14.6 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+935 ms ± 58.4 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
-In [5]: from fast_histogram.histogram import histogram2d
+In [5]: from fast_histogram import histogram2d
 
-In [6]: %timeit _ = histogram2d(x, y, 30, -1, 2, 30, -2, 4)
-56.1 ms ± 2.57 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+In [6]: %timeit _ = histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)
+40.2 ms ± 624 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
 ```
 
-The version here is almost 20 times faster! The following plot shows the
+The version here is over 20 times faster! The following plot shows the
 speedup as a function of array size for the bin parameters shown above:
 
 ![speedup_plot](speedup.png)
@@ -54,36 +54,51 @@ on the order of 40x.
 Q&A
 ---
 
-**Why not use Cython?**
+### Are the 2D histograms not transposed compared to what they should be?
+
+There is technically no 'right' and 'wrong' orientation - here we adopt the
+convention which gives results consistent with Numpy, so:
+
+```python
+numpy.histogram2d(x, y, range=[[xmin, xmax], [ymin, ymax]], bins=[nx, ny])
+```
+
+should give the same result as:
+
+```python
+fast_histogram.histogram2d(x, y, range=[[xmin, xmax], [ymin, ymax]], bins=[nx, ny])
+```
+
+### Why not use Cython?
 
 I originally implemented this in Cython, but found that I could get a 50%
 performance improvement by going straight to a C extension.
 
-**What about using Numba?**
+### What about using Numba?**
 
 I specifically want to keep this package as easy as possible to install, and
 while [Numba](https://numba.pydata.org) is a great package, it is not trivial
 to install outside of Anaconda.
 
-**Could this be parallelized?**
+### Could this be parallelized?
 
 This may benefit from parallelization under certain circumstances. The easiest
 solution might be to use OpenMP, but this won't work on all platforms, so it
 would need to be made optional.
 
-**Couldn't you make it faster by using the GPU?**
+### Couldn't you make it faster by using the GPU?
 
 Almost certainly, though the aim here is to have an easily installable and
 portable package, and introducing GPUs is going to affect both of these.
 
-**Why make a package specifically for this? This is a tiny amount of functionality**
+### Why make a package specifically for this? This is a tiny amount of functionality
 
 Packages that need this could simply bundle their own C extension or Cython code
 to do this, but the main motivation for releasing this as a mini-package is to
 avoid making pure-Python packages into packages that require compilation just
 because of the need to compute fast histograms.
 
-**Can I contribute?**
+### Can I contribute?
 
 Yes please! This is not meant to be a finished package, and I welcome pull
 request to improve things.

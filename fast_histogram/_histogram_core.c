@@ -63,7 +63,6 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
     double fnx;
     double normx;
 
-
     /* Parse the input tuple */
     if (!PyArg_ParseTuple(args, "Oidd", &x_obj, &nx, &xmin, &xmax)) {
         PyErr_SetString(PyExc_TypeError, "Error parsing input");
@@ -171,8 +170,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
     }
 
     /* Build the output array */
-    dims[0] = ny;
-    dims[1] = nx;
+    dims[0] = nx;
+    dims[1] = ny;
 
     count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     if (count_array == NULL) {
@@ -202,7 +201,7 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
       if ((tx >= xmin) && (tx <= xmax) && (ty >= ymin) && (ty <= ymax)) {
           ix = (tx - xmin) * normx * fnx;
           iy = (ty - ymin) * normy * fny;
-          count[ix + nx * iy] += 1.;
+          count[iy + ny * ix] += 1.;
       }
 
     }
