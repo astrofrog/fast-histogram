@@ -88,12 +88,12 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
     double *x = (double*)PyArray_DATA(x_array);
     double *count = (double*)PyArray_DATA(count_array);
 
-    int ix;
+    int i, ix;
     double tx;
     double fnx = nx;
     double normx = 1. / (xmax - xmin);
 
-    for(int i = 0; i < n; i++) {
+    for(i = 0; i < n; i++) {
 
       tx = x[i];
 
@@ -165,14 +165,14 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
     double *y = (double*)PyArray_DATA(y_array);
     double *count = (double*)PyArray_DATA(count_array);
 
-    int ix, iy;
+    int i, ix, iy;
     double tx, ty;
     double fnx = nx;
     double fny = ny;
     double normx = 1. / (xmax - xmin);
     double normy = 1. / (ymax - ymin);
 
-    for(int i = 0; i < n; i++) {
+    for(i = 0; i < n; i++) {
 
       tx = x[i];
       ty = x[i];
