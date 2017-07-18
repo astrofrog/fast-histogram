@@ -1,4 +1,4 @@
-|Build Status|
+|Travis Status| |AppVeyor Status|
 
 About
 -----
@@ -127,5 +127,8 @@ Can I contribute?
 Yes please! This is not meant to be a finished package, and I welcome
 pull request to improve things.
 
-.. |Build Status| image:: https://travis-ci.org/astrofrog/fast-histogram.svg?branch=master
+.. |Travis Status| image:: https://travis-ci.org/astrofrog/fast-histogram.svg?branch=master
    :target: https://travis-ci.org/astrofrog/fast-histogram
+
+.. |AppVeyor Status| image:: https://ci.appveyor.com/api/projects/status/ek63g9haku5on0q2/branch/master?svg=true
+   :target: https://ci.appveyor.com/project/astrofrog/fast-histogram
