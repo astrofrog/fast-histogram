@@ -25,6 +25,21 @@ def histogram1d(x, nx, xmin, xmax):
     array : `~numpy.ndarray`
         The 1D histogram array
     """
+
+    if not np.isfinite(xmin):
+        raise ValueError("xmin should be finite")
+
+    if not np.isfinite(xmax):
+        raise ValueError("xmax should be finite")
+
+    if xmax <= xmin:
+        raise ValueError("xmax should be greater than xmin")
+
+    if nx <= 0:
+        raise ValueError("nx should be strictly positive")
+
+    x = np.asarray(x, np.float)
+
     return histogram1d_cython(x, nx, xmin, xmax)
 
 
@@ -50,6 +65,32 @@ def histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax):
     array : `~numpy.ndarray`
         The 2D histogram array
     """
-    x = np.asarray(x, float)
-    y = np.asarray(y, float)
+
+    if not np.isfinite(xmin):
+        raise ValueError("xmin should be finite")
+
+    if not np.isfinite(xmax):
+        raise ValueError("xmax should be finite")
+
+    if not np.isfinite(ymin):
+        raise ValueError("ymin should be finite")
+
+    if not np.isfinite(ymax):
+        raise ValueError("ymax should be finite")
+
+    if xmax <= xmin:
+        raise ValueError("xmax should be greater than xmin")
+
+    if ymax <= ymin:
+        raise ValueError("xmax should be greater than xmin")
+
+    if nx <= 0:
+        raise ValueError("nx should be strictly positive")
+
+    if ny <= 0:
+        raise ValueError("ny should be strictly positive")
+
+    x = np.asarray(x, np.float)
+    y = np.asarray(y, np.float)
+
     return histogram2d_cython(x, y, nx, xmin, xmax, ny, ymin, ymax)

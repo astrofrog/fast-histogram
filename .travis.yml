@@ -1,0 +1,26 @@
+language: python
+
+sudo: false
+
+os:
+  - linux
+  - osx
+
+python:
+  - 2.7
+  - 3.5
+  - 3.6
+
+env:
+  global:
+    - CONDA_DEPENDENCIES="cython numpy pytest"
+    - PIP_DEPENDENCIES="hypothesis[numpy]"
+
+install:
+  - git clone git://github.com/astropy/ci-helpers.git
+  - source ci-helpers/travis/setup_conda.sh
+
+script:
+  - python setup.py build_ext --inplace
+  - pytest fast_histogram
+

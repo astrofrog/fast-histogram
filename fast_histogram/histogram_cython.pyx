@@ -2,6 +2,7 @@ from __future__ import division
 
 import numpy as np
 cimport numpy as np
+from libc.math cimport round
 
 DTYPE = np.float
 ctypedef np.float_t DTYPE_t
@@ -11,7 +12,7 @@ cimport cython
 
 @cython.boundscheck(False)
 def histogram1d_cython(np.ndarray[DTYPE_t, ndim=1] x,
-                       int nx, float xmin, float xmax):
+                       int nx, double xmin, double xmax):
 
     cdef int n = x.shape[0]
 
@@ -19,9 +20,9 @@ def histogram1d_cython(np.ndarray[DTYPE_t, ndim=1] x,
 
     cdef int ix
     cdef unsigned int i
-    cdef float normx
-    cdef float tx
-    cdef float fnx = float(nx)
+    cdef double normx
+    cdef double tx
+    cdef double fnx = nx
 
     normx = 1. / (xmax - xmin)
 
@@ -29,17 +30,18 @@ def histogram1d_cython(np.ndarray[DTYPE_t, ndim=1] x,
         for i in range(n):
             tx = x[i]
             if tx > xmin and tx < xmax:
-                ix = int((x[i] - xmin) * normx * fnx)
+                ix = int((tx - xmin) * normx * fnx)
                 count[ix] += 1.
 
     return count
 
 
 @cython.boundscheck(False)
+@cython.cdivision(True)
 def histogram2d_cython(np.ndarray[DTYPE_t, ndim=1] x,
                        np.ndarray[DTYPE_t, ndim=1] y,
-                       int nx, float xmin, float xmax,
-                       int ny, float ymin, float ymax):
+                       int nx, double xmin, double xmax,
+                       int ny, double ymin, double ymax):
 
     cdef int n = x.shape[0]
 
@@ -47,10 +49,10 @@ def histogram2d_cython(np.ndarray[DTYPE_t, ndim=1] x,
 
     cdef int ix, iy
     cdef unsigned int i, j
-    cdef float normx, normy
-    cdef float tx, ty
-    cdef float fnx = float(nx)
-    cdef float fny = float(ny)
+    cdef double normx, normy
+    cdef double tx, ty
+    cdef double fnx = nx
+    cdef double fny = ny
 
     normx = 1. / (xmax - xmin)
     normy = 1. / (ymax - ymin)
@@ -59,9 +61,9 @@ def histogram2d_cython(np.ndarray[DTYPE_t, ndim=1] x,
         for i in range(n):
             tx = x[i]
             ty = y[i]
-            if tx > xmin and tx < xmax and ty > ymin and ty < ymax:
-                ix = int((x[i] - xmin) * normx * fnx)
-                iy = int((y[i] - ymin) * normy * fny)
+            if tx >= xmin and tx <= xmax and ty >= ymin and ty <= ymax:
+                ix = int((tx - xmin) * normx * fnx)
+                iy = int((ty - ymin) * normy * fny)
                 count[iy, ix] += 1.
 
     return count
