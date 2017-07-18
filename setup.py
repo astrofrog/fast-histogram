@@ -9,7 +9,7 @@ extensions = [Extension("fast_histogram._histogram_core",
                        include_dirs=[np.get_include()])]
 
 setup(name='fast-histogram',
-      version='0.2.1',
+      version='0.3.dev0',
       description='Fast simple 1D and 2D histograms',
       long_description=open('README.rst').read(),
       install_requires=['numpy'],
