@@ -8,7 +8,7 @@ os:
 
 env:
   global:
-    - CONDA_DEPENDENCIES="cython numpy pytest"
+    - CONDA_DEPENDENCIES="cython numpy pytest nomkl"
     - PIP_DEPENDENCIES="hypothesis[numpy]"
   matrix:
     - PYTHON_VERSION=2.7
