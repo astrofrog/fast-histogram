@@ -19,7 +19,7 @@ def histogram1d(x, bins, range):
         The position of the points to bin in the 1D histogram
     bins : int
         The number of bins
-    range : float, optional
+    range : iterable
         The range as a tuple of (xmin, xmax)
 
     Returns
