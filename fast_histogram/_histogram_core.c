@@ -106,7 +106,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
 
       tx = x[i];
 
-      if ((tx >= xmin) & (tx <= xmax)) {
+      if (tx >= xmin && tx < xmax) {
           ix = (tx - xmin) * normx * fnx;
           count[ix] += 1.;
       }
