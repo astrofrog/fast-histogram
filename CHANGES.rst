@@ -1,9 +1,11 @@
 0.3 (unreleased)
 ----------------
 
-- Return edges for consistency with Numpy.
+- Return edges for consistency with Numpy. [#9]
 
-- Use long instead of int for x/y sizes and indices.
+- Use long instead of int for x/y sizes and indices. [#3]
+
+- Fix potential memory issue with histogram1d. [#6]
 
 0.2.1 (2017-07-18)
 ------------------
