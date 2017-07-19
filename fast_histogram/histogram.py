@@ -9,7 +9,7 @@ from ._histogram_core import _histogram1d, _histogram2d
 __all__ = ['histogram1d', 'histogram2d']
 
 
-def histogram1d(x, bins, range):
+def histogram1d(x, bins, range, return_edges=True):
     """
     Compute a 1D histogram assuming equally spaced bins.
 
@@ -21,6 +21,8 @@ def histogram1d(x, bins, range):
         The number of bins
     range : iterable
         The range as a tuple of (xmin, xmax)
+    return_edges : bool
+        Whether to return the edges for consistency with Numpy
 
     Returns
     -------
@@ -45,10 +47,16 @@ def histogram1d(x, bins, range):
 
     x = np.ascontiguousarray(x, np.float)
 
-    return _histogram1d(x, nx, xmin, xmax)
+    result = _histogram1d(x, nx, xmin, xmax)
+
+    if return_edges:
+        x_edges = np.linspace(xmin, xmax, nx + 1)
+        return result, x_edges
+    else:
+        return result
 
 
-def histogram2d(x, y, bins, range):
+def histogram2d(x, y, bins, range, return_edges=True):
     """
     Compute a 2D histogram assuming equally spaced bins.
 
@@ -62,6 +70,8 @@ def histogram2d(x, y, bins, range):
     range : iterable
         The range to use in each dimention, as an iterable of value pairs, i.e.
         [(xmin, xmax), (ymin, ymax)]
+    return_edges : bool
+        Whether to return the edges for consistency with Numpy
 
     Returns
     -------
@@ -103,4 +113,11 @@ def histogram2d(x, y, bins, range):
     x = np.ascontiguousarray(x, np.float)
     y = np.ascontiguousarray(y, np.float)
 
-    return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
+    result = _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
+
+    if return_edges:
+        x_edges = np.linspace(xmin, xmax, nx + 1)
+        y_edges = np.linspace(ymin, ymax, ny + 1)
+        return result, x_edges, y_edges
+    else:
+        return result

@@ -1,12 +1,16 @@
 0.3 (unreleased)
 ----------------
 
-- Use long instead of int for x/y sizes and indices
+- Return edges for consistency with Numpy. [#9]
+
+- Use long instead of int for x/y sizes and indices. [#3]
+
+- Fix potential memory issue with histogram1d. [#6]
 
 0.2.1 (2017-07-18)
 ------------------
 
-- Fixed rst syntax in README
+- Fixed rst syntax in README.
 
 0.2 (2017-07-18)
 ----------------
