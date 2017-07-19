@@ -64,6 +64,11 @@ from 15x for small arrays to around 7x for large arrays.
 Q&A
 ---
 
+Why don't the histogram functions return the edges?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Computing and returning the edges may seem trivial but it can slow things down by a factor of a few when computing histograms of 10^5 or fewer elements, so not returning the edges is a deliberate decision related to performance. You can easily compute the edges yourself if needed though, using ``numpy.linspace``.
+
 Doesn't package X already do this, but better?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
