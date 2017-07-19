@@ -1,7 +1,7 @@
 0.3 (unreleased)
 ----------------
 
-- No changes yet.
+- Use long instead of int for x/y sizes and indices
 
 0.2.1 (2017-07-18)
 ------------------
