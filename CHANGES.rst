@@ -1,12 +1,14 @@
 0.3 (unreleased)
 ----------------
 
-- Use long instead of int for x/y sizes and indices
+- Return edges for consistency with Numpy.
+
+- Use long instead of int for x/y sizes and indices.
 
 0.2.1 (2017-07-18)
 ------------------
 
-- Fixed rst syntax in README
+- Fixed rst syntax in README.
 
 0.2 (2017-07-18)
 ----------------

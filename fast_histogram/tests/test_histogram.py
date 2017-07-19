@@ -23,7 +23,7 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax):
 
     x = arrays(np.float, size, elements=st.floats(-1000, 1000)).example()
 
-    reference = np.histogram(x, bins=nx, range=(xmin, xmax))[0]
+    reference, xe_ref = np.histogram(x, bins=nx, range=(xmin, xmax))
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435
@@ -31,9 +31,10 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax):
     if n_inside != np.sum(reference):
         return
 
-    fast = histogram1d(x, bins=nx, range=(xmin, xmax))
+    fast, xe_fast = histogram1d(x, bins=nx, range=(xmin, xmax))
 
     np.testing.assert_equal(fast, reference)
+    np.testing.assert_allclose(xe_fast, xe_ref)
 
 
 @given(size=st.integers(0, 100),
@@ -53,8 +54,8 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax):
     y = arrays(np.float, size, elements=st.floats(-1000, 1000)).example()
 
     try:
-        reference = np.histogram2d(x, y, bins=(nx, ny),
-                                   range=((xmin, xmax), (ymin, ymax)))[0]
+        reference, xe_ref, ye_ref = np.histogram2d(x, y, bins=(nx, ny),
+                                                     range=((xmin, xmax), (ymin, ymax)))
     except:
         # If Numpy fails, we skip the comparison since this isn't our fault
         return
@@ -65,9 +66,11 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax):
     if n_inside != np.sum(reference):
         return
 
-    fast = histogram2d(x, y, bins=(nx, ny),
-                       range=((xmin, xmax), (ymin, ymax)))
+    fast, xe_fast, ye_fast = histogram2d(x, y, bins=(nx, ny),
+                                         range=((xmin, xmax), (ymin, ymax)))
 
     print(x, y, nx, xmin, xmax, ny, ymin, ymax)
 
     np.testing.assert_equal(fast, reference)
+    np.testing.assert_allclose(xe_fast, xe_ref)
+    np.testing.assert_allclose(ye_fast, ye_ref)
