@@ -51,6 +51,8 @@ histogram:
     In [6]: %timeit _ = histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)
     40.2 ms ± 624 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
 
+(note that ``10_000_000`` is possible in Python 3.6 syntax, use ``10000000`` instead in previous versions)
+
 The version here is over 20 times faster! The following plot shows the
 speedup as a function of array size for the bin parameters shown above:
 
