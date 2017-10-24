@@ -3,6 +3,8 @@
 
 - Use long instead of int for x/y sizes and indices
 
+- Implement support for weights= option
+
 0.2.1 (2017-07-18)
 ------------------
 
