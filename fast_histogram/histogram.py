@@ -4,12 +4,15 @@ import numbers
 
 import numpy as np
 
-from ._histogram_core import _histogram1d, _histogram2d
+from ._histogram_core import (_histogram1d,
+                              _histogram2d,
+                              _histogram1d_weighted,
+                              _histogram2d_weighted)
 
 __all__ = ['histogram1d', 'histogram2d']
 
 
-def histogram1d(x, bins, range):
+def histogram1d(x, bins, range, weights=None):
     """
     Compute a 1D histogram assuming equally spaced bins.
 
@@ -21,6 +24,8 @@ def histogram1d(x, bins, range):
         The number of bins
     range : iterable
         The range as a tuple of (xmin, xmax)
+    weights : `~numpy.ndarray`
+        The weights of the points in the 1D histogram
 
     Returns
     -------
@@ -45,10 +50,14 @@ def histogram1d(x, bins, range):
 
     x = np.ascontiguousarray(x, np.float)
 
-    return _histogram1d(x, nx, xmin, xmax)
+    if weights is None:
+        return _histogram1d(x, nx, xmin, xmax)
+    else:
+        weights = np.ascontiguousarray(weights, np.float)
+        return _histogram1d_weighted(x, weights, nx, xmin, xmax)
 
 
-def histogram2d(x, y, bins, range):
+def histogram2d(x, y, bins, range, weights=None):
     """
     Compute a 2D histogram assuming equally spaced bins.
 
@@ -62,6 +71,8 @@ def histogram2d(x, y, bins, range):
     range : iterable
         The range to use in each dimention, as an iterable of value pairs, i.e.
         [(xmin, xmax), (ymin, ymax)]
+    weights : `~numpy.ndarray`
+        The weights of the points in the 1D histogram
 
     Returns
     -------
@@ -103,4 +114,8 @@ def histogram2d(x, y, bins, range):
     x = np.ascontiguousarray(x, np.float)
     y = np.ascontiguousarray(y, np.float)
 
-    return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
+    if weights is None:
+        return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
+    else:
+        weights = np.ascontiguousarray(weights, np.float)
+        return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax)
