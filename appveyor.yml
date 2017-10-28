@@ -31,4 +31,4 @@ build: false
 
 test_script:
     - "%CMD_IN_ENV% python setup.py build_ext --inplace"
-    - "%CMD_IN_ENV% pytest fast_histogram"
+    - "%CMD_IN_ENV% pytest fast_histogram -p no:warnings --hypothesis-show-statistics"

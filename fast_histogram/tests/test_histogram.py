@@ -1,6 +1,6 @@
 import numpy as np
 
-from hypothesis import given, settings, example
+from hypothesis import given, settings, example, assume
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 
@@ -16,7 +16,7 @@ from ..histogram import histogram1d, histogram2d
        nx=st.integers(1, 10),
        xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
        weights=st.booleans())
-@settings(max_examples=10000)
+@settings(max_examples=5000)
 def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights):
 
     if xmax <= xmin:
@@ -34,12 +34,10 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights):
     # bug report https://github.com/numpy/numpy/issues/9435
     inside = (x <= xmax) & (x >= xmin)
     if weights:
-        if not np.allclose(np.sum(w[inside]), np.sum(reference)):
-            return
+        assume(np.allclose(np.sum(w[inside]), np.sum(reference)))
     else:
         n_inside = np.sum(inside)
-        if n_inside != np.sum(reference):
-            return
+        assume(n_inside == np.sum(reference))
 
     fast = histogram1d(x, bins=nx, weights=w, range=(xmin, xmax))
 
@@ -52,7 +50,7 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights):
        ny=st.integers(1, 10),
        ymin=st.floats(-1e10, 1e10), ymax=st.floats(-1e10, 1e10),
        weights=st.booleans())
-@settings(max_examples=10000)
+@settings(max_examples=5000)
 @example(size=5, nx=1, xmin=0.0, xmax=84.17833763374462, ny=1, ymin=-999999999.9999989, ymax=0.0, weights=False)
 @example(size=1, nx=1, xmin=-2.2204460492503135e-06, xmax=0.0, ny=1, ymin=0.0, ymax=1.1102230246251567e-05, weights=False)
 def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights):
@@ -70,7 +68,7 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights):
     try:
         reference = np.histogram2d(x, y, bins=(nx, ny), weights=w,
                                    range=((xmin, xmax), (ymin, ymax)))[0]
-    except:
+    except Exception:
         # If Numpy fails, we skip the comparison since this isn't our fault
         return
 
@@ -78,12 +76,10 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights):
     # bug report https://github.com/numpy/numpy/issues/9435
     inside = (x <= xmax) & (x >= xmin) & (y <= ymax) & (y >= ymin)
     if weights:
-        if not np.allclose(np.sum(w[inside]), np.sum(reference)):
-            return
+        assume(np.allclose(np.sum(w[inside]), np.sum(reference)))
     else:
         n_inside = np.sum(inside)
-        if not weights and n_inside != np.sum(reference):
-            return
+        assume(n_inside == np.sum(reference))
 
     fast = histogram2d(x, y, bins=(nx, ny), weights=w,
                        range=((xmin, xmax), (ymin, ymax)))
