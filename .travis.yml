@@ -23,5 +23,5 @@ install:
 script:
   - python setup.py check --restructuredtext
   - python setup.py build_ext --inplace
-  - pytest fast_histogram
+  - pytest fast_histogram -p no:warnings --hypothesis-show-statistics
 
