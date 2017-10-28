@@ -1,4 +1,4 @@
-0.3 (unreleased)
+0.3 (2017-10-28)
 ----------------
 
 - Use long instead of int for x/y sizes and indices
