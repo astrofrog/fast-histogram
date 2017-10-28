@@ -65,8 +65,12 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights):
     else:
         w = None
 
-    reference = np.histogram2d(x, y, bins=(nx, ny), weights=w,
-                               range=((xmin, xmax), (ymin, ymax)))[0]
+    try:
+        reference = np.histogram2d(x, y, bins=(nx, ny), weights=w,
+                                   range=((xmin, xmax), (ymin, ymax)))[0]
+    except Exception:
+        # If Numpy fails, we skip the comparison since this isn't our fault
+        return
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435
