@@ -16,11 +16,13 @@ also robust and reliable. The result is a 1D histogram function here that
 is **7-15x faster** than ``numpy.histogram``, and a 2D histogram function
 that is **20-25x faster** than ``numpy.histogram2d``.
 
-To install:
-
-::
+To install::
 
     pip install fast-histogram
+
+or if you use conda you can instead do::
+
+    conda install -c conda-forge fast-histogram
 
 The ``fast_histogram`` module then provides two functions:
 ``histogram1d`` and ``histogram2d``:
