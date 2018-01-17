@@ -92,6 +92,9 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
         return NULL;
     }
 
+    /* Releasing GIL, no allocation/referencing allowed
+     (see `ndarraytypes.h` for macros) */
+    Py_BEGIN_ALLOW_THREADS
     PyArray_FILLWBYTE(count_array, 0);
 
     /* Get pointers to the data as C-types. */
@@ -112,8 +115,9 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
       }
 
     }
-
+    
     /* Clean up. */
+    Py_END_ALLOW_THREADS
     Py_DECREF(x_array);
 
     return count_array;
@@ -172,6 +176,9 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
         return NULL;
     }
 
+    /* Releasing GIL, no allocation/referencing allowed
+     (see `ndarraytypes.h` for macros) */
+    Py_BEGIN_ALLOW_THREADS
     PyArray_FILLWBYTE(count_array, 0);
 
     /* Get pointers to the data as C-types. */
@@ -196,8 +203,9 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
       }
 
     }
-
+    
     /* Clean up. */
+    Py_END_ALLOW_THREADS
     Py_DECREF(x_array);
     Py_DECREF(y_array);
 
@@ -256,6 +264,9 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args)
         return NULL;
     }
 
+    /* Releasing GIL, no allocation/referencing allowed
+     (see `ndarraytypes.h` for macros) */
+    Py_BEGIN_ALLOW_THREADS
     PyArray_FILLWBYTE(count_array, 0);
 
     /* Get pointers to the data as C-types. */
@@ -279,6 +290,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args)
     }
 
     /* Clean up. */
+    Py_END_ALLOW_THREADS
     Py_DECREF(x_array);
     Py_DECREF(w_array);
 
@@ -341,6 +353,9 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args)
         return NULL;
     }
 
+    /* Releasing GIL, no allocation/referencing allowed
+     (see `ndarraytypes.h` for macros) */
+    Py_BEGIN_ALLOW_THREADS
     PyArray_FILLWBYTE(count_array, 0);
 
     /* Get pointers to the data as C-types. */
@@ -368,6 +383,7 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args)
     }
 
     /* Clean up. */
+    Py_END_ALLOW_THREADS
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(w_array);
