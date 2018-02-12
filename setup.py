@@ -8,7 +8,7 @@ from setuptools.command.build_ext import build_ext
 
 class build_ext_with_numpy(build_ext):
     def finalize_options(self):
-        super(build_ext_with_numpy, self).finalize_options()
+        build_ext.finalize_options(self)
         import numpy
         self.include_dirs.append(numpy.get_include())
 
