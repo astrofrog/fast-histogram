@@ -21,7 +21,6 @@ install:
   - source ci-helpers/travis/setup_conda.sh
 
 script:
-  - python setup.py check --restructuredtext
+  - LC_ALL=C python setup.py check --restructuredtext
   - python setup.py build_ext --inplace
   - pytest fast_histogram -p no:warnings --hypothesis-show-statistics
-
