@@ -1,4 +1,4 @@
-0.4 (unreleased)
+0.4 (2018-02-12)
 ----------------
 
 - Make sure that Numpy is not required to run setup.py. [#15]
