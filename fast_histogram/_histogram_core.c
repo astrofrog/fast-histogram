@@ -56,10 +56,11 @@ MOD_INIT(_histogram_core)
 
 
 double byteswap_f64(double value){
+    int i;
     double result;
     char *orig = (char *)&value;
     char *dest = (char *)&result;
-    for(int i=0; i<DOUBLE_SIZE; i++) dest[i] = orig[DOUBLE_SIZE - i - 1];
+    for(i=0; i<DOUBLE_SIZE; i++) dest[i] = orig[DOUBLE_SIZE - i - 1];
     return result;
 }
 
