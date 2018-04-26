@@ -1,0 +1,17 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: quay.io/pypa/manylinux1_i686
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: /opt/python/cp36-cp36m/bin/pip install numpy pytest hypothesis[numpy]
+      - run:
+          name: Build extension
+          command: /opt/python/cp36-cp36m/bin/python setup.py build_ext --inplace
+      - run:
+          name: Run tests
+          command: /opt/python/cp36-cp36m/bin/pytest fast_histogram -p no:warnings --hypothesis-show-statistics
