@@ -9,6 +9,8 @@ static char _histogram2d_docstring[] = "Compute a 2D histogram";
 static char _histogram1d_weighted_docstring[] = "Compute a weighted 1D histogram";
 static char _histogram2d_weighted_docstring[] = "Compute a weighted 2D histogram";
 
+static int DOUBLE_SIZE = sizeof(double);
+
 /* Declare the C functions here. */
 static PyObject *_histogram1d(PyObject *self, PyObject *args);
 static PyObject *_histogram2d(PyObject *self, PyObject *args);
@@ -53,24 +55,32 @@ MOD_INIT(_histogram_core)
 }
 
 
+double byteswap_f64(double value){
+    double result;
+    char *orig = (char *)&value;
+    char *dest = (char *)&result;
+    for(int i=0; i<DOUBLE_SIZE; i++) dest[i] = orig[DOUBLE_SIZE - i - 1];
+    return result;
+}
+
 static PyObject *_histogram1d(PyObject *self, PyObject *args)
 {
 
     long i, n;
-    int ix, nx;
+    int ix, nx, xbyteswap;
     double xmin, xmax, tx, fnx, normx;
     PyObject *x_obj, *x_array, *count_array;
     npy_intp dims[1];
     double *x, *count;
 
     /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "Oidd", &x_obj, &nx, &xmin, &xmax)) {
+    if (!PyArg_ParseTuple(args, "Oiddi", &x_obj, &nx, &xmin, &xmax, &xbyteswap)) {
         PyErr_SetString(PyExc_TypeError, "Error parsing input");
         return NULL;
     }
 
     /* Interpret the input objects as `numpy` arrays. */
-    x_array = PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_IN_ARRAY);
+    x_array = PyArray_FROM_O(x_obj);
 
     /* If that didn't work, throw an `Exception`. */
     if (x_array == NULL) {
@@ -106,6 +116,8 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
 
       tx = x[i];
 
+      if(xbyteswap) tx = byteswap_f64(tx);
+
       if (tx >= xmin && tx < xmax) {
           ix = (tx - xmin) * normx * fnx;
           count[ix] += 1.;
@@ -125,21 +137,21 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
 {
 
     long i, n;
-    int ix, iy, nx, ny;
+    int ix, iy, nx, ny, xbyteswap, ybyteswap;
     double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy;
     PyObject *x_obj, *y_obj, *x_array, *y_array, *count_array;
     npy_intp dims[2];
     double *x, *y, *count;
 
     /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "OOiddidd", &x_obj, &y_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax)) {
+    if (!PyArg_ParseTuple(args, "OOiddiddii", &x_obj, &y_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax, &xbyteswap, &ybyteswap)) {
         PyErr_SetString(PyExc_TypeError, "Error parsing input");
         return NULL;
     }
 
     /* Interpret the input objects as `numpy` arrays. */
-    x_array = PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_IN_ARRAY);
-    y_array = PyArray_FROM_OTF(y_obj, NPY_DOUBLE, NPY_IN_ARRAY);
+    x_array = PyArray_FROM_O(x_obj);
+    y_array = PyArray_FROM_O(y_obj);
 
     /* If that didn't work, throw an `Exception`. */
     if (x_array == NULL || y_array == NULL) {
@@ -189,6 +201,9 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
       tx = x[i];
       ty = y[i];
 
+      if(xbyteswap) tx = byteswap_f64(tx);
+      if(ybyteswap) ty = byteswap_f64(ty);
+
       if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
           ix = (tx - xmin) * normx * fnx;
           iy = (ty - ymin) * normy * fny;
@@ -210,14 +225,14 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args)
 {
 
     long i, n;
-    int ix, nx;
-    double xmin, xmax, tx, fnx, normx;
+    int ix, nx, xbyteswap, wbyteswap;
+    double xmin, xmax, tx, tw, fnx, normx;
     PyObject *x_obj, *x_array, *w_obj, *w_array, *count_array;
     npy_intp dims[1];
     double *x, *w, *count;
 
     /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "OOidd", &x_obj, &w_obj, &nx, &xmin, &xmax)) {
+    if (!PyArg_ParseTuple(args, "OOiddii", &x_obj, &w_obj, &nx, &xmin, &xmax, &xbyteswap, &wbyteswap)) {
         PyErr_SetString(PyExc_TypeError, "Error parsing input");
         return NULL;
     }
@@ -270,10 +285,14 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args)
     for(i = 0; i < n; i++) {
 
       tx = x[i];
+      tw = w[i];
+
+      if(xbyteswap) tx = byteswap_f64(tx);
+      if(wbyteswap) tw = byteswap_f64(tw);
 
       if (tx >= xmin && tx < xmax) {
           ix = (tx - xmin) * normx * fnx;
-          count[ix] += w[i];
+          count[ix] += tw;
       }
 
     }
@@ -291,14 +310,14 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args)
 {
 
     long i, n;
-    int ix, iy, nx, ny;
-    double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy;
+    int ix, iy, nx, ny, xbyteswap, ybyteswap, wbyteswap;
+    double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy, tw;
     PyObject *x_obj, *y_obj, *w_obj, *x_array, *y_array, *w_array, *count_array;
     npy_intp dims[2];
     double *x, *y, *w, *count;
 
     /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "OOOiddidd", &x_obj, &y_obj, &w_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax)) {
+    if (!PyArg_ParseTuple(args, "OOOiddiddiii", &x_obj, &y_obj, &w_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax, &xbyteswap, &ybyteswap, &wbyteswap)) {
         PyErr_SetString(PyExc_TypeError, "Error parsing input");
         return NULL;
     }
@@ -358,6 +377,11 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args)
 
       tx = x[i];
       ty = y[i];
+      tw = w[i];
+
+      if(xbyteswap) tx = byteswap_f64(tx);
+      if(ybyteswap) ty = byteswap_f64(ty);
+      if(wbyteswap) tw = byteswap_f64(tw);
 
       if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
           ix = (tx - xmin) * normx * fnx;
