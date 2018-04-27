@@ -1,7 +1,6 @@
 from __future__ import division
 
 import numbers
-from time import perf_counter
 import numpy as np
 
 from ._histogram_core import (_histogram1d,
@@ -14,15 +13,15 @@ __all__ = ['histogram1d', 'histogram2d']
 _cast_to = {
     np.dtype('float64'): None,
     np.dtype('float32'): None,
-    np.dtype('bool'):    np.dtype('float32'),
-    np.dtype('uint8'):   np.dtype('float32'),
-    np.dtype('int8'):    np.dtype('float32'),
-    np.dtype('uint16'):  np.dtype('float32'),
-    np.dtype('int16'):   np.dtype('float32'),
-    np.dtype('uint32'):  np.dtype('float64'),
-    np.dtype('int32'):   np.dtype('float64'),
-    np.dtype('uint64'):  np.dtype('float64'),
-    np.dtype('int64'):   np.dtype('float64'),
+    np.dtype('bool')   : np.dtype('float32'),
+    np.dtype('uint8')  : np.dtype('float32'),
+    np.dtype('int8')   : np.dtype('float32'),
+    np.dtype('uint16') : np.dtype('float32'),
+    np.dtype('int16')  : np.dtype('float32'),
+    np.dtype('uint32') : np.dtype('float64'),
+    np.dtype('int32')  : np.dtype('float64'),
+    np.dtype('uint64') : np.dtype('float64'),
+    np.dtype('int64')  : np.dtype('float64')
 }
 
 
