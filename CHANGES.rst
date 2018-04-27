@@ -1,7 +1,14 @@
-0.4 (unreleased)
+0.5 (unreleased)
 ----------------
 
 - No changes yet.
+
+0.4 (2018-02-12)
+----------------
+
+- Make sure that Numpy is not required to run setup.py. [#15]
+
+- Fix installation on platforms with an ASCII locale. [#15]
 
 0.3 (2017-10-28)
 ----------------
