@@ -1,7 +1,8 @@
 0.5 (unreleased)
 ----------------
 
-- No changes yet.
+- Fix bug that caused histograms of n-dimensional arrays to
+  not be computed correctly. [#21]
 
 0.4 (2018-02-12)
 ----------------

@@ -50,6 +50,9 @@ def histogram1d(x, bins, range, weights=None):
 
     x = np.ascontiguousarray(x, np.float)
 
+    if x.ndim > 1:
+        x = x.ravel()
+
     if weights is None:
         return _histogram1d(x, nx, xmin, xmax)
     else:
@@ -113,6 +116,12 @@ def histogram2d(x, y, bins, range, weights=None):
 
     x = np.ascontiguousarray(x, np.float)
     y = np.ascontiguousarray(y, np.float)
+
+    if x.ndim > 1:
+        x = x.ravel()
+
+    if y.ndim > 1:
+        y = y.ravel()
 
     if weights is None:
         return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
