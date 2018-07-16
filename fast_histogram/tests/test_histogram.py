@@ -85,3 +85,21 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights):
                        range=((xmin, xmax), (ymin, ymax)))
 
     np.testing.assert_equal(fast, reference)
+
+
+def test_nd_arrays():
+
+    x = np.random.random(1000)
+
+    result_1d = histogram1d(x, bins=10, range=(0, 1))
+    result_3d = histogram1d(x.reshape((10, 10, 10)), bins=10, range=(0, 1))
+
+    np.testing.assert_equal(result_1d, result_3d)
+
+    y = np.random.random(1000)
+
+    result_1d = histogram2d(x, y, bins=(10, 10), range=[(0, 1), (0, 1)])
+    result_3d = histogram2d(x.reshape((10, 10, 10)), y.reshape((10, 10, 10)),
+                            bins=(10, 10), range=[(0, 1), (0, 1)])
+
+    np.testing.assert_equal(result_1d, result_3d)
