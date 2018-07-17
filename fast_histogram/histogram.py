@@ -12,16 +12,6 @@ from ._histogram_core import (_histogram1d,
 __all__ = ['histogram1d', 'histogram2d']
 
 
-def byteswap_if_needed(array):
-    if (isinstance(array, np.ndarray) and array.dtype.kind == 'f'
-            and array.dtype.itemsize == 8 and array.flags.c_contiguous):
-        byteswap = int(not array.dtype.isnative)
-    else:
-        array = np.ascontiguousarray(array, np.float)
-        byteswap = 0
-    return array, byteswap
-
-
 def histogram1d(x, bins, range, weights=None):
     """
     Compute a 1D histogram assuming equally spaced bins.
@@ -58,19 +48,10 @@ def histogram1d(x, bins, range, weights=None):
     if nx <= 0:
         raise ValueError("nx should be strictly positive")
 
-    x, xbyteswap = byteswap_if_needed(x)
-
-    if x.ndim > 1:
-        x = x.ravel()
-
-    if x.size == 0:
-        return np.zeros(nx)
-
     if weights is None:
-        return _histogram1d(x, nx, xmin, xmax, xbyteswap)
+        return _histogram1d(x, nx, xmin, xmax)
     else:
-        weights, wbyteswap = byteswap_if_needed(weights)
-        return _histogram1d_weighted(x, weights, nx, xmin, xmax, xbyteswap, wbyteswap)
+        return _histogram1d_weighted(x, weights, nx, xmin, xmax)
 
 
 def histogram2d(x, y, bins, range, weights=None):
@@ -127,17 +108,7 @@ def histogram2d(x, y, bins, range, weights=None):
     if ny <= 0:
         raise ValueError("ny should be strictly positive")
 
-    x, xbyteswap = byteswap_if_needed(x)
-    y, ybyteswap = byteswap_if_needed(y)
-
-    if x.ndim > 1:
-        x = x.ravel()
-
-    if y.ndim > 1:
-        y = y.ravel()
-
     if weights is None:
-        return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax, xbyteswap, ybyteswap)
+        return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
     else:
-        weights, wbyteswap = byteswap_if_needed(weights)
-        return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax, xbyteswap, ybyteswap, wbyteswap)
+        return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax)

@@ -9,8 +9,6 @@ static char _histogram2d_docstring[] = "Compute a 2D histogram";
 static char _histogram1d_weighted_docstring[] = "Compute a weighted 1D histogram";
 static char _histogram2d_weighted_docstring[] = "Compute a weighted 2D histogram";
 
-static int DOUBLE_SIZE = sizeof(double);
-
 /* Declare the C functions here. */
 static PyObject *_histogram1d(PyObject *self, PyObject *args);
 static PyObject *_histogram2d(PyObject *self, PyObject *args);
@@ -54,349 +52,557 @@ MOD_INIT(_histogram_core)
     return MOD_SUCCESS_VAL(m);
 }
 
+static PyObject *_histogram1d(PyObject *self, PyObject *args) {
 
-double byteswap_f64(double value){
-    int i;
-    double result;
-    char *orig = (char *)&value;
-    char *dest = (char *)&result;
-    for(i=0; i<DOUBLE_SIZE; i++) dest[i] = orig[DOUBLE_SIZE - i - 1];
-    return result;
-}
+  long n;
+  int ix, nx;
+  double xmin, xmax, tx, fnx, normx;
+  PyObject *x_obj, *count_array;
+  PyArrayObject *x_array;
+  npy_intp dims[1];
+  double *count;
+  NpyIter *iter;
+  NpyIter_IterNextFunc *iternext;
+  char **dataptr;
+  npy_intp *strideptr, *innersizeptr;
+  PyArray_Descr *dtype;
 
-static PyObject *_histogram1d(PyObject *self, PyObject *args)
-{
+  /* Parse the input tuple */
+  if (!PyArg_ParseTuple(args, "Oidd", &x_obj, &nx, &xmin, &xmax)) {
+    PyErr_SetString(PyExc_TypeError, "Error parsing input");
+    return NULL;
+  }
 
-    long i, n;
-    int ix, nx, xbyteswap;
-    double xmin, xmax, tx, fnx, normx;
-    PyObject *x_obj, *x_array, *count_array;
-    npy_intp dims[1];
-    double *x, *count;
+  /* Interpret the input objects as `numpy` arrays. */
+  x_array = (PyArrayObject *)PyArray_FROM_O(x_obj);
 
-    /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "Oiddi", &x_obj, &nx, &xmin, &xmax, &xbyteswap)) {
-        PyErr_SetString(PyExc_TypeError, "Error parsing input");
-        return NULL;
-    }
+  /* If that didn't work, throw an `Exception`. */
+  if (x_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
+    Py_XDECREF(x_array);
+    return NULL;
+  }
 
-    /* Interpret the input objects as `numpy` arrays. */
-    x_array = PyArray_FROM_O(x_obj);
+  /* How many data points are there? */
+  n = (long)PyArray_DIM(x_array, 0);
 
-    /* If that didn't work, throw an `Exception`. */
-    if (x_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
-        Py_XDECREF(x_array);
-        return NULL;
-    }
+  /* Build the output array */
+  dims[0] = nx;
+  count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+  if (count_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
+    Py_DECREF(x_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
 
-    /* How many data points are there? */
-    n = (long)PyArray_DIM(x_array, 0);
+  PyArray_FILLWBYTE(count_array, 0);
 
-    /* Build the output array */
-    dims[0] = nx;
-    count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-    if (count_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
-        Py_DECREF(x_array);
-        Py_XDECREF(count_array);
-        return NULL;
-    }
+  if (n == 0) {
+    Py_DECREF(x_array);
+    return count_array;
+  }
 
-    PyArray_FILLWBYTE(count_array, 0);
+  dtype = PyArray_DescrFromType(NPY_DOUBLE);
+  iter = NpyIter_New(x_array,
+                     NPY_ITER_READONLY | NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
+                     NPY_KEEPORDER, NPY_SAFE_CASTING, dtype);
+  if (iter == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    Py_DECREF(x_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
 
-    /* Get pointers to the data as C-types. */
+  /*
+   * The iternext function gets stored in a local variable
+   * so it can be called repeatedly in an efficient manner.
+   */
+  iternext = NpyIter_GetIterNext(iter, NULL);
+  if (iternext == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't set up iterator");
+    NpyIter_Deallocate(iter);
+    Py_DECREF(x_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
 
-    x = (double*)PyArray_DATA(x_array);
-    count = (double*)PyArray_DATA(count_array);
+  /* The location of the data pointer which the iterator may update */
+  dataptr = (char **)NpyIter_GetDataPtrArray(iter);
 
-    fnx = nx;
-    normx = 1. / (xmax - xmin);
+  /* The location of the stride which the iterator may update */
+  strideptr = NpyIter_GetInnerStrideArray(iter);
 
-    for(i = 0; i < n; i++) {
+  /* The location of the inner loop size which the iterator may update */
+  innersizeptr = NpyIter_GetInnerLoopSizePtr(iter);
 
-      tx = x[i];
+  /* Pre-compute variables for efficiency in the histogram calculation */
+  fnx = nx;
+  normx = 1. / (xmax - xmin);
 
-      if(xbyteswap) tx = byteswap_f64(tx);
+  /* Get C array for output array */
+  count = (double *)PyArray_DATA(count_array);
+
+  do {
+
+    /* Get the inner loop data/stride/count values */
+    npy_intp stride = *strideptr;
+    npy_intp size = *innersizeptr;
+
+    /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
+    while (size--) {
+
+      tx = *(double *)dataptr[0];
 
       if (tx >= xmin && tx < xmax) {
-          ix = (tx - xmin) * normx * fnx;
-          count[ix] += 1.;
+        ix = (tx - xmin) * normx * fnx;
+        count[ix] += 1.;
       }
 
+      dataptr[0] += stride;
     }
 
-    /* Clean up. */
-    Py_DECREF(x_array);
+  } while (iternext(iter));
 
-    return count_array;
+  NpyIter_Deallocate(iter);
 
+  /* Clean up. */
+  Py_DECREF(x_array);
+
+  return count_array;
 }
 
+static PyObject *_histogram2d(PyObject *self, PyObject *args) {
 
-static PyObject *_histogram2d(PyObject *self, PyObject *args)
-{
+  long n;
+  int ix, iy, nx, ny;
+  double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy;
+  PyObject *x_obj, *y_obj, *count_array;
+  PyArrayObject *x_array, *y_array;
+  npy_intp dims[2];
+  double *count;
+  NpyIter *iter;
+  NpyIter_IterNextFunc *iternext;
+  char **dataptr;
+  npy_intp *strideptr, *innersizeptr;
+  PyArray_Descr *dtypes[] = {PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE)};
+  npy_uint32 op_flags[] = {NPY_ITER_READONLY, NPY_ITER_READONLY};
 
-    long i, n;
-    int ix, iy, nx, ny, xbyteswap, ybyteswap;
-    double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy;
-    PyObject *x_obj, *y_obj, *x_array, *y_array, *count_array;
-    npy_intp dims[2];
-    double *x, *y, *count;
+  /* Parse the input tuple */
+  if (!PyArg_ParseTuple(args, "OOiddidd", &x_obj, &y_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax)) {
+    PyErr_SetString(PyExc_TypeError, "Error parsing input");
+    return NULL;
+  }
 
-    /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "OOiddiddii", &x_obj, &y_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax, &xbyteswap, &ybyteswap)) {
-        PyErr_SetString(PyExc_TypeError, "Error parsing input");
-        return NULL;
-    }
+  /* Interpret the input objects as `numpy` arrays. */
+  x_array = (PyArrayObject *)PyArray_FROM_O(x_obj);
+  y_array = (PyArrayObject *)PyArray_FROM_O(y_obj);
 
-    /* Interpret the input objects as `numpy` arrays. */
-    x_array = PyArray_FROM_O(x_obj);
-    y_array = PyArray_FROM_O(y_obj);
+  /* If that didn't work, throw an `Exception`. */
+  if (x_array == NULL || y_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
+    Py_XDECREF(x_array);
+    Py_XDECREF(y_array);
+    return NULL;
+  }
 
-    /* If that didn't work, throw an `Exception`. */
-    if (x_array == NULL || y_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
-        Py_XDECREF(x_array);
-        Py_XDECREF(y_array);
-        return NULL;
-    }
+  /* How many data points are there? */
+  n = (long)PyArray_DIM(x_array, 0);
 
-    /* How many data points are there? */
-    n = (long)PyArray_DIM(x_array, 0);
-
-    /* Check the dimensions. */
-    if (n != (long)PyArray_DIM(y_array, 0)) {
-        PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x and y");
-        Py_DECREF(x_array);
-        Py_DECREF(y_array);
-        return NULL;
-    }
-
-    /* Build the output array */
-    dims[0] = nx;
-    dims[1] = ny;
-
-    count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-    if (count_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
-        Py_DECREF(x_array);
-        Py_XDECREF(count_array);
-        return NULL;
-    }
-
-    PyArray_FILLWBYTE(count_array, 0);
-
-    /* Get pointers to the data as C-types. */
-    x = (double*)PyArray_DATA(x_array);
-    y = (double*)PyArray_DATA(y_array);
-    count = (double*)PyArray_DATA(count_array);
-
-    fnx = nx;
-    fny = ny;
-    normx = 1. / (xmax - xmin);
-    normy = 1. / (ymax - ymin);
-
-    for(i = 0; i < n; i++) {
-
-      tx = x[i];
-      ty = y[i];
-
-      if(xbyteswap) tx = byteswap_f64(tx);
-      if(ybyteswap) ty = byteswap_f64(ty);
-
-      if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
-          ix = (tx - xmin) * normx * fnx;
-          iy = (ty - ymin) * normy * fny;
-          count[iy + ny * ix] += 1.;
-      }
-
-    }
-
-    /* Clean up. */
+  /* Check the dimensions. */
+  if (n != (long)PyArray_DIM(y_array, 0)) {
+    PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x and y");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
+    return NULL;
+  }
 
+  /* Build the output array */
+  dims[0] = nx;
+  dims[1] = ny;
+  count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  if (count_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
+    Py_DECREF(x_array);
+    Py_DECREF(y_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
+
+  PyArray_FILLWBYTE(count_array, 0);
+
+  if (n == 0) {
+    Py_DECREF(x_array);
+    Py_DECREF(y_array);
     return count_array;
+  }
 
+  PyArrayObject *op[] = {x_array, y_array};
+  iter = NpyIter_AdvancedNew(2, op,
+                             NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
+                             NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
+                             -1, NULL, NULL, 0);
+  if (iter == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    Py_DECREF(x_array);
+    Py_DECREF(y_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
+
+  /*
+   * The iternext function gets stored in a local variable
+   * so it can be called repeatedly in an efficient manner.
+   */
+  iternext = NpyIter_GetIterNext(iter, NULL);
+  if (iternext == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    NpyIter_Deallocate(iter);
+    Py_DECREF(x_array);
+    Py_DECREF(y_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
+
+  /* The location of the data pointer which the iterator may update */
+  dataptr = (char **)NpyIter_GetDataPtrArray(iter);
+
+  /* The location of the stride which the iterator may update */
+  strideptr = NpyIter_GetInnerStrideArray(iter);
+
+  /* The location of the inner loop size which the iterator may update */
+  innersizeptr = NpyIter_GetInnerLoopSizePtr(iter);
+
+  /* Pre-compute variables for efficiency in the histogram calculation */
+  fnx = nx;
+  fny = ny;
+  normx = 1. / (xmax - xmin);
+  normy = 1. / (ymax - ymin);
+
+  /* Get C array for output array */
+  count = (double *)PyArray_DATA(count_array);
+
+  do {
+
+    /* Get the inner loop data/stride/count values */
+    npy_intp stride = *strideptr;
+    npy_intp size = *innersizeptr;
+
+    /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
+    while (size--) {
+
+      tx = *(double *)dataptr[0];
+      ty = *(double *)dataptr[1];
+
+      if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
+        ix = (tx - xmin) * normx * fnx;
+        iy = (ty - ymin) * normy * fny;
+        count[iy + ny * ix] += 1.;
+      }
+
+      dataptr[0] += stride;
+      dataptr[1] += stride;
+    }
+
+  } while (iternext(iter));
+
+  NpyIter_Deallocate(iter);
+
+  /* Clean up. */
+  Py_DECREF(x_array);
+  Py_DECREF(y_array);
+
+  return count_array;
 }
 
+static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
 
-static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args)
-{
+  long n;
+  int ix, nx;
+  double xmin, xmax, tx, tw, fnx, normx;
+  PyObject *x_obj, *w_obj, *count_array;
+  PyArrayObject *x_array, *w_array;
+  npy_intp dims[1];
+  double *count;
+  NpyIter *iter;
+  NpyIter_IterNextFunc *iternext;
+  char **dataptr;
+  npy_intp *strideptr, *innersizeptr;
+  PyArray_Descr *dtypes[] = {PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE)};
+  npy_uint32 op_flags[] = {NPY_ITER_READONLY, NPY_ITER_READONLY};
 
-    long i, n;
-    int ix, nx, xbyteswap, wbyteswap;
-    double xmin, xmax, tx, tw, fnx, normx;
-    PyObject *x_obj, *x_array, *w_obj, *w_array, *count_array;
-    npy_intp dims[1];
-    double *x, *w, *count;
+  /* Parse the input tuple */
+  if (!PyArg_ParseTuple(args, "OOidd", &x_obj, &w_obj, &nx, &xmin, &xmax)) {
+    PyErr_SetString(PyExc_TypeError, "Error parsing input");
+    return NULL;
+  }
 
-    /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "OOiddii", &x_obj, &w_obj, &nx, &xmin, &xmax, &xbyteswap, &wbyteswap)) {
-        PyErr_SetString(PyExc_TypeError, "Error parsing input");
-        return NULL;
-    }
+  /* Interpret the input objects as `numpy` arrays. */
+  x_array = (PyArrayObject *)PyArray_FROM_O(x_obj);
+  w_array = (PyArrayObject *)PyArray_FROM_O(w_obj);
 
-    /* Interpret the input objects as `numpy` arrays. */
-    x_array = PyArray_FROM_O(x_obj);
-    w_array = PyArray_FROM_O(w_obj);
+  /* If that didn't work, throw an `Exception`. */
+  if (x_array == NULL || w_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
+    Py_XDECREF(x_array);
+    Py_XDECREF(w_array);
+    return NULL;
+  }
 
-    /* If that didn't work, throw an `Exception`. */
-    if (x_array == NULL || w_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
-        Py_XDECREF(x_array);
-        Py_XDECREF(w_array);
-        return NULL;
-    }
+  /* How many data points are there? */
+  n = (long)PyArray_DIM(x_array, 0);
 
-    /* How many data points are there? */
-    n = (long)PyArray_DIM(x_array, 0);
+  /* Check the dimensions. */
+  if (n != (long)PyArray_DIM(w_array, 0)) {
+    PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x and w");
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    return NULL;
+  }
 
-    /* Check the dimensions. */
-    if (n != (long)PyArray_DIM(w_array, 0)) {
-        PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x and w");
-        Py_DECREF(x_array);
-        Py_DECREF(w_array);
-        return NULL;
-    }
+  /* Build the output array */
+  dims[0] = nx;
+  count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+  if (count_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
 
-    /* Build the output array */
-    dims[0] = nx;
-    count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-    if (count_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
-        Py_DECREF(x_array);
-        Py_DECREF(w_array);
-        Py_XDECREF(count_array);
-        return NULL;
-    }
+  PyArray_FILLWBYTE(count_array, 0);
 
-    PyArray_FILLWBYTE(count_array, 0);
+  if (n == 0) {
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    return count_array;
+  }
 
-    /* Get pointers to the data as C-types. */
+  PyArrayObject *op[] = {x_array, w_array};
+  iter = NpyIter_AdvancedNew(2, op,
+                             NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
+                             NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
+                             -1, NULL, NULL, 0);
+  if (iter == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
 
-    x = (double*)PyArray_DATA(x_array);
-    w = (double*)PyArray_DATA(w_array);
-    count = (double*)PyArray_DATA(count_array);
+  /*
+   * The iternext function gets stored in a local variable
+   * so it can be called repeatedly in an efficient manner.
+   */
+  iternext = NpyIter_GetIterNext(iter, NULL);
+  if (iternext == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    NpyIter_Deallocate(iter);
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
 
-    fnx = nx;
-    normx = 1. / (xmax - xmin);
+  /* The location of the data pointer which the iterator may update */
+  dataptr = (char **)NpyIter_GetDataPtrArray(iter);
 
-    for(i = 0; i < n; i++) {
+  /* The location of the stride which the iterator may update */
+  strideptr = NpyIter_GetInnerStrideArray(iter);
 
-      tx = x[i];
-      tw = w[i];
+  /* The location of the inner loop size which the iterator may update */
+  innersizeptr = NpyIter_GetInnerLoopSizePtr(iter);
 
-      if(xbyteswap) tx = byteswap_f64(tx);
-      if(wbyteswap) tw = byteswap_f64(tw);
+  /* Pre-compute variables for efficiency in the histogram calculation */
+  fnx = nx;
+  normx = 1. / (xmax - xmin);
+
+  /* Get C array for output array */
+  count = (double *)PyArray_DATA(count_array);
+
+  do {
+
+    /* Get the inner loop data/stride/count values */
+    npy_intp stride = *strideptr;
+    npy_intp size = *innersizeptr;
+
+    /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
+    while (size--) {
+
+      tx = *(double *)dataptr[0];
+      tw = *(double *)dataptr[1];
 
       if (tx >= xmin && tx < xmax) {
-          ix = (tx - xmin) * normx * fnx;
-          count[ix] += tw;
+        ix = (tx - xmin) * normx * fnx;
+        count[ix] += tw;
       }
 
+      dataptr[0] += stride;
+      dataptr[1] += stride;
     }
 
-    /* Clean up. */
-    Py_DECREF(x_array);
-    Py_DECREF(w_array);
+  } while (iternext(iter));
 
-    return count_array;
+  NpyIter_Deallocate(iter);
 
+  /* Clean up. */
+  Py_DECREF(x_array);
+  Py_DECREF(w_array);
+
+  return count_array;
 }
 
+static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
 
-static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args)
-{
+  long n;
+  int ix, iy, nx, ny;
+  double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy, tw;
+  PyObject *x_obj, *y_obj, *w_obj, *count_array;
+  PyArrayObject *x_array, *y_array, *w_array;
+  npy_intp dims[2];
+  double *count;
+  NpyIter *iter;
+  NpyIter_IterNextFunc *iternext;
+  char **dataptr;
+  npy_intp *strideptr, *innersizeptr;
+  PyArray_Descr *dtypes[] = {PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE)};
+  npy_uint32 op_flags[] = {NPY_ITER_READONLY, NPY_ITER_READONLY, NPY_ITER_READONLY};
 
-    long i, n;
-    int ix, iy, nx, ny, xbyteswap, ybyteswap, wbyteswap;
-    double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy, tw;
-    PyObject *x_obj, *y_obj, *w_obj, *x_array, *y_array, *w_array, *count_array;
-    npy_intp dims[2];
-    double *x, *y, *w, *count;
+  /* Parse the input tuple */
+  if (!PyArg_ParseTuple(args, "OOOiddidd", &x_obj, &y_obj, &w_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax)) {
+    PyErr_SetString(PyExc_TypeError, "Error parsing input");
+    return NULL;
+  }
 
-    /* Parse the input tuple */
-    if (!PyArg_ParseTuple(args, "OOOiddiddiii", &x_obj, &y_obj, &w_obj, &nx, &xmin, &xmax, &ny, &ymin, &ymax, &xbyteswap, &ybyteswap, &wbyteswap)) {
-        PyErr_SetString(PyExc_TypeError, "Error parsing input");
-        return NULL;
-    }
+  /* Interpret the input objects as `numpy` arrays. */
+  x_array = (PyArrayObject *)PyArray_FROM_O(x_obj);
+  y_array = (PyArrayObject *)PyArray_FROM_O(y_obj);
+  w_array = (PyArrayObject *)PyArray_FROM_O(w_obj);
 
-    /* Interpret the input objects as `numpy` arrays. */
-    x_array = PyArray_FROM_O(x_obj);
-    y_array = PyArray_FROM_O(y_obj);
-    w_array = PyArray_FROM_O(w_obj);
+  /* If that didn't work, throw an `Exception`. */
+  if (x_array == NULL || y_array == NULL || w_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
+    Py_XDECREF(x_array);
+    Py_XDECREF(y_array);
+    Py_XDECREF(w_array);
+    return NULL;
+  }
 
-    /* If that didn't work, throw an `Exception`. */
-    if (x_array == NULL || y_array == NULL || w_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
-        Py_XDECREF(x_array);
-        Py_XDECREF(y_array);
-        Py_XDECREF(w_array);
-        return NULL;
-    }
+  /* How many data points are there? */
+  n = (long)PyArray_DIM(x_array, 0);
 
-    /* How many data points are there? */
-    n = (long)PyArray_DIM(x_array, 0);
-
-    /* Check the dimensions. */
-    if (n != (long)PyArray_DIM(y_array, 0) || n != (long)PyArray_DIM(w_array, 0)) {
-        PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x, y, and w");
-        Py_DECREF(x_array);
-        Py_DECREF(y_array);
-        Py_DECREF(w_array);
-        return NULL;
-    }
-
-    /* Build the output array */
-    dims[0] = nx;
-    dims[1] = ny;
-
-    count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-    if (count_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
-        Py_DECREF(x_array);
-        Py_XDECREF(count_array);
-        return NULL;
-    }
-
-    PyArray_FILLWBYTE(count_array, 0);
-
-    /* Get pointers to the data as C-types. */
-    x = (double*)PyArray_DATA(x_array);
-    y = (double*)PyArray_DATA(y_array);
-    w = (double*)PyArray_DATA(w_array);
-    count = (double*)PyArray_DATA(count_array);
-
-    fnx = nx;
-    fny = ny;
-    normx = 1. / (xmax - xmin);
-    normy = 1. / (ymax - ymin);
-
-    for(i = 0; i < n; i++) {
-
-      tx = x[i];
-      ty = y[i];
-      tw = w[i];
-
-      if(xbyteswap) tx = byteswap_f64(tx);
-      if(ybyteswap) ty = byteswap_f64(ty);
-      if(wbyteswap) tw = byteswap_f64(tw);
-
-      if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
-          ix = (tx - xmin) * normx * fnx;
-          iy = (ty - ymin) * normy * fny;
-          count[iy + ny * ix] += tw;
-      }
-
-    }
-
-    /* Clean up. */
+  /* Check the dimensions. */
+  if (n != (long)PyArray_DIM(y_array, 0) || n != (long)PyArray_DIM(w_array, 0)) {
+    PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x, y, and w");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(w_array);
+    return NULL;
+  }
 
+  /* Build the output array */
+  dims[0] = nx;
+  dims[1] = ny;
+  count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  if (count_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
+    Py_DECREF(x_array);
+    Py_DECREF(y_array);
+    Py_DECREF(w_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
+
+  PyArray_FILLWBYTE(count_array, 0);
+
+  if (n == 0) {
+    Py_DECREF(x_array);
+    Py_DECREF(y_array);
+    Py_DECREF(w_array);
     return count_array;
+  }
 
+  PyArrayObject *op[] = {x_array, y_array, w_array};
+  iter = NpyIter_AdvancedNew(3, op,
+                             NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
+                             NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
+                             -1, NULL, NULL, 0);
+  if (iter == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    Py_DECREF(x_array);
+    Py_DECREF(y_array);
+    Py_DECREF(w_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
+
+  /*
+   * The iternext function gets stored in a local variable
+   * so it can be called repeatedly in an efficient manner.
+   */
+  iternext = NpyIter_GetIterNext(iter, NULL);
+  if (iternext == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    NpyIter_Deallocate(iter);
+    Py_DECREF(x_array);
+    Py_DECREF(y_array);
+    Py_DECREF(w_array);
+    Py_XDECREF(count_array);
+    return NULL;
+  }
+
+  /* The location of the data pointer which the iterator may update */
+  dataptr = (char **)NpyIter_GetDataPtrArray(iter);
+
+  /* The location of the stride which the iterator may update */
+  strideptr = NpyIter_GetInnerStrideArray(iter);
+
+  /* The location of the inner loop size which the iterator may update */
+  innersizeptr = NpyIter_GetInnerLoopSizePtr(iter);
+
+  /* Pre-compute variables for efficiency in the histogram calculation */
+  fnx = nx;
+  fny = ny;
+  normx = 1. / (xmax - xmin);
+  normy = 1. / (ymax - ymin);
+
+  /* Get C array for output array */
+  count = (double *)PyArray_DATA(count_array);
+
+  do {
+
+    /* Get the inner loop data/stride/count values */
+    npy_intp stride = *strideptr;
+    npy_intp size = *innersizeptr;
+
+    /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
+    while (size--) {
+
+      tx = *(double *)dataptr[0];
+      ty = *(double *)dataptr[1];
+      tw = *(double *)dataptr[2];
+
+      if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
+        ix = (tx - xmin) * normx * fnx;
+        iy = (ty - ymin) * normy * fny;
+        count[iy + ny * ix] += tw;
+      }
+
+      dataptr[0] += stride;
+      dataptr[1] += stride;
+      dataptr[2] += stride;
+    }
+
+  } while (iternext(iter));
+
+  NpyIter_Deallocate(iter);
+
+  /* Clean up. */
+  Py_DECREF(x_array);
+  Py_DECREF(y_array);
+  Py_DECREF(w_array);
+
+  return count_array;
 }
