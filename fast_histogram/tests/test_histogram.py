@@ -15,16 +15,17 @@ from ..histogram import histogram1d, histogram2d
 @given(size=st.integers(0, 100),
        nx=st.integers(1, 10),
        xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
-       weights=st.booleans())
+       weights=st.booleans(),
+       dtype=st.sampled_from(['>f8', '<f8']))
 @settings(max_examples=5000)
-def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights):
+def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
 
     if xmax <= xmin:
         return
 
-    x = arrays(np.float, size, elements=st.floats(-1000, 1000)).example()
+    x = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
     if weights:
-        w = arrays(np.float, size, elements=st.floats(-1000, 1000)).example()
+        w = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
     else:
         w = None
 
@@ -49,19 +50,21 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights):
        xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
        ny=st.integers(1, 10),
        ymin=st.floats(-1e10, 1e10), ymax=st.floats(-1e10, 1e10),
-       weights=st.booleans())
+       weights=st.booleans(),
+       dtype=st.sampled_from(['>f8', '<f8']))
 @settings(max_examples=5000)
-@example(size=5, nx=1, xmin=0.0, xmax=84.17833763374462, ny=1, ymin=-999999999.9999989, ymax=0.0, weights=False)
-@example(size=1, nx=1, xmin=-2.2204460492503135e-06, xmax=0.0, ny=1, ymin=0.0, ymax=1.1102230246251567e-05, weights=False)
-def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights):
+@example(size=5, nx=1, xmin=0.0, xmax=84.17833763374462, ny=1, ymin=-999999999.9999989, ymax=0.0, weights=False, dtype='<f8')
+@example(size=1, nx=1, xmin=-2.2204460492503135e-06, xmax=0.0, ny=1, ymin=0.0, ymax=1.1102230246251567e-05, weights=False, dtype='<f8')
+@example(size=3, nx=1, xmin=0.0, xmax=841.7833941010146, ny=1, ymin=-135.92383885097095, ymax=0.0, weights=True, dtype='>f8')
+def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights, dtype):
 
     if xmax <= xmin or ymax <= ymin:
         return
 
-    x = arrays(np.float, size, elements=st.floats(-1000, 1000)).example()
-    y = arrays(np.float, size, elements=st.floats(-1000, 1000)).example()
+    x = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
+    y = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
     if weights:
-        w = arrays(np.float, size, elements=st.floats(-1000, 1000)).example()
+        w = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
     else:
         w = None
 
@@ -103,3 +106,16 @@ def test_nd_arrays():
                             bins=(10, 10), range=[(0, 1), (0, 1)])
 
     np.testing.assert_equal(result_1d, result_3d)
+
+
+def test_list():
+
+    # Make sure that lists can be passed in
+
+    x_list = [1.4, 2.1, 4.2]
+    x_arr = np.array(x_list)
+
+    result_list = histogram1d(x_list, bins=10, range=(0, 10))
+    result_arr = histogram1d(x_arr, bins=10, range=(0, 10))
+
+    np.testing.assert_equal(result_list, result_arr)

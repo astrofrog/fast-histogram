@@ -13,7 +13,8 @@ __all__ = ['histogram1d', 'histogram2d']
 
 
 def byteswap_if_needed(array):
-    if array.dtype.kind == 'f' and array.dtype.itemsize == 8 and array.flags.c_contiguous:
+    if (isinstance(array, np.ndarray) and array.dtype.kind == 'f'
+            and array.dtype.itemsize == 8 and array.flags.c_contiguous):
         byteswap = int(not array.dtype.isnative)
     else:
         array = np.ascontiguousarray(array, np.float)
@@ -61,6 +62,9 @@ def histogram1d(x, bins, range, weights=None):
 
     if x.ndim > 1:
         x = x.ravel()
+
+    if x.size == 0:
+        return np.zeros(nx)
 
     if weights is None:
         return _histogram1d(x, nx, xmin, xmax, xbyteswap)

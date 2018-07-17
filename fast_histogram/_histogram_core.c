@@ -239,8 +239,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args)
     }
 
     /* Interpret the input objects as `numpy` arrays. */
-    x_array = PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_IN_ARRAY);
-    w_array = PyArray_FROM_OTF(w_obj, NPY_DOUBLE, NPY_IN_ARRAY);
+    x_array = PyArray_FROM_O(x_obj);
+    w_array = PyArray_FROM_O(w_obj);
 
     /* If that didn't work, throw an `Exception`. */
     if (x_array == NULL || w_array == NULL) {
@@ -324,9 +324,9 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args)
     }
 
     /* Interpret the input objects as `numpy` arrays. */
-    x_array = PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_IN_ARRAY);
-    y_array = PyArray_FROM_OTF(y_obj, NPY_DOUBLE, NPY_IN_ARRAY);
-    w_array = PyArray_FROM_OTF(w_obj, NPY_DOUBLE, NPY_IN_ARRAY);
+    x_array = PyArray_FROM_O(x_obj);
+    y_array = PyArray_FROM_O(y_obj);
+    w_array = PyArray_FROM_O(w_obj);
 
     /* If that didn't work, throw an `Exception`. */
     if (x_array == NULL || y_array == NULL || w_array == NULL) {
@@ -387,7 +387,7 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args)
       if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
           ix = (tx - xmin) * normx * fnx;
           iy = (ty - ymin) * normy * fny;
-          count[iy + ny * ix] += w[i];
+          count[iy + ny * ix] += tw;
       }
 
     }
