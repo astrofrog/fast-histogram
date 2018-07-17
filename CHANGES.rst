@@ -4,6 +4,8 @@
 - Fix bug that caused histograms of n-dimensional arrays to
   not be computed correctly. [#21]
 
+- Avoid memory copies for non-native endian 64-bit float arrays. [#18]
+
 0.4 (2018-02-12)
 ----------------
 
