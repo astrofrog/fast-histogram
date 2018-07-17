@@ -13,8 +13,17 @@ class build_ext_with_numpy(build_ext):
         self.include_dirs.append(numpy.get_include())
 
 
+extra_compile_args = []
+# Uncomment these lines to enable loop vectorization reports from the compiler
+# if os.name == 'nt':
+#       extra_compile_args = ['/Qvec-report:2']
+# else:
+#       extra_compile_args = ['-fopt-info-vec', '-fopt-info-vec-missed', '-fdiagnostics-color=always']
+
 extensions = [Extension("fast_histogram._histogram_core",
-                        [os.path.join('fast_histogram', '_histogram_core.c')])]
+                       [os.path.join('fast_histogram', '_histogram_core.c')],
+                       extra_compile_args=extra_compile_args
+                       )]
 
 with io.open('README.rst', encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()

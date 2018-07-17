@@ -1,7 +1,6 @@
 from __future__ import division
 
 import numbers
-
 import numpy as np
 
 from ._histogram_core import (_histogram1d,
@@ -10,6 +9,20 @@ from ._histogram_core import (_histogram1d,
                               _histogram2d_weighted)
 
 __all__ = ['histogram1d', 'histogram2d']
+
+_cast_to = {
+    np.dtype('float64'): None,
+    np.dtype('float32'): None,
+    np.dtype('bool')   : np.dtype('float32'),
+    np.dtype('uint8')  : np.dtype('float32'),
+    np.dtype('int8')   : np.dtype('float32'),
+    np.dtype('uint16') : np.dtype('float32'),
+    np.dtype('int16')  : np.dtype('float32'),
+    np.dtype('uint32') : np.dtype('float64'),
+    np.dtype('int32')  : np.dtype('float64'),
+    np.dtype('uint64') : np.dtype('float64'),
+    np.dtype('int64')  : np.dtype('float64')
+}
 
 
 def histogram1d(x, bins, range, weights=None):
@@ -32,7 +45,6 @@ def histogram1d(x, bins, range, weights=None):
     array : `~numpy.ndarray`
         The 1D histogram array
     """
-
     nx = bins
     xmin, xmax = range
 
@@ -48,16 +60,24 @@ def histogram1d(x, bins, range, weights=None):
     if nx <= 0:
         raise ValueError("nx should be strictly positive")
 
-    x = np.ascontiguousarray(x, np.float)
+    castType = _cast_to[x.dtype]
+    if not x.flags.c_contiguous:
+        x = np.ascontiguousarray(x, castType)
+    elif castType:
+        x = x.astype(castType)
 
     if x.ndim > 1:
         x = x.ravel()
 
     if weights is None:
         return _histogram1d(x, nx, xmin, xmax)
-    else:
-        weights = np.ascontiguousarray(weights, np.float)
-        return _histogram1d_weighted(x, weights, nx, xmin, xmax)
+
+     # Else weighted histogram
+    if not weights.flags.c_contiguous:
+        weights = np.ascontiguousarray(weights, castType)
+    elif castType:
+        weights = weights.astype(castType)
+    return _histogram1d_weighted(x, weights, nx, xmin, xmax)
 
 
 def histogram2d(x, y, bins, range, weights=None):
@@ -114,8 +134,19 @@ def histogram2d(x, y, bins, range, weights=None):
     if ny <= 0:
         raise ValueError("ny should be strictly positive")
 
-    x = np.ascontiguousarray(x, np.float)
-    y = np.ascontiguousarray(y, np.float)
+    castXType = _cast_to[x.dtype]
+    castYType = _cast_to[y.dtype]
+    castType = np.dtype('f'%np.maximum(castXType.itemsize, castYType.itemsize))
+
+    if not x.flags.c_contiguous:
+        x = np.ascontiguousarray(x, castXType)
+    elif castXType != castType:
+        x = x.astype(castXType)
+    
+    if not y.flags.c_contiguous:
+        y = np.ascontiguousarray(y, castYType)
+    elif castYType != castType:
+        y = y.astype(castYType)
 
     if x.ndim > 1:
         x = x.ravel()
@@ -125,6 +156,11 @@ def histogram2d(x, y, bins, range, weights=None):
 
     if weights is None:
         return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
-    else:
-        weights = np.ascontiguousarray(weights, np.float)
-        return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax)
+
+    # Else weighted histogram
+    if not weights.flags.c_contiguous:
+        weights = np.ascontiguousarray(weights, castXType)
+    elif weights.dtype != castType:
+        weights = weights.astype(castXType)
+
+    return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax)
