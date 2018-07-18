@@ -9,6 +9,8 @@
 - Avoid memory copies for any numerical Numpy type and
   non-contiguous arrays. [#23]
 
+- Raise a better error if arrays are passed to the ``bins`` argument. [#24]
+
 0.4 (2018-02-12)
 ----------------
 
