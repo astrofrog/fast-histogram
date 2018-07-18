@@ -90,7 +90,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
   dims[0] = nx;
   count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
   if (count_array == NULL) {
-    PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
     Py_DECREF(x_array);
     Py_XDECREF(count_array);
     return NULL;
@@ -120,7 +120,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
    */
   iternext = NpyIter_GetIterNext(iter, NULL);
   if (iternext == NULL) {
-    PyErr_SetString(PyExc_TypeError, "Couldn't set up iterator");
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     NpyIter_Deallocate(iter);
     Py_DECREF(x_array);
     Py_XDECREF(count_array);
@@ -222,7 +222,7 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   dims[1] = ny;
   count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
   if (count_array == NULL) {
-    PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_XDECREF(count_array);
@@ -365,7 +365,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
   dims[0] = nx;
   count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
   if (count_array == NULL) {
-    PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
     Py_DECREF(x_array);
     Py_DECREF(w_array);
     Py_XDECREF(count_array);
@@ -509,7 +509,7 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   dims[1] = ny;
   count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
   if (count_array == NULL) {
-    PyErr_SetString(PyExc_TypeError, "Couldn't build output array");
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(w_array);
