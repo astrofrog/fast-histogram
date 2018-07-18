@@ -34,6 +34,10 @@ def histogram1d(x, bins, range, weights=None):
     """
 
     nx = bins
+
+    if not np.isscalar(bins):
+        raise TypeError('bins should be an integer')
+
     xmin, xmax = range
 
     if not np.isfinite(xmin):
@@ -81,6 +85,9 @@ def histogram2d(x, y, bins, range, weights=None):
         nx = ny = bins
     else:
         nx, ny = bins
+
+    if not np.isscalar(nx) or not np.isscalar(ny):
+        raise TypeError('bins should be an iterable of two integers')
 
     (xmin, xmax), (ymin, ymax) = range
 

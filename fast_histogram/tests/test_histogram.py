@@ -1,5 +1,7 @@
 import numpy as np
 
+import pytest
+
 from hypothesis import given, settings, example, assume
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
@@ -166,3 +168,17 @@ def test_non_contiguous():
                            range=[(0, 1), (0, 1)], weights=w)
 
     np.testing.assert_equal(result_1, result_2)
+
+
+def test_array_bins():
+
+    edges = np.array([0, 1, 2, 3, 4])
+
+    with pytest.raises(TypeError) as exc:
+        histogram1d([1, 2, 3], bins=edges, range=(0, 10))
+    assert exc.value.args[0] == 'bins should be an integer'
+
+    with pytest.raises(TypeError) as exc:
+        histogram2d([1, 2, 3], [1, 2 ,3], bins=[edges, edges],
+                    range=[(0, 10), (0, 10)])
+    assert exc.value.args[0] == 'bins should be an iterable of two integers'
