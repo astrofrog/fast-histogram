@@ -134,3 +134,35 @@ def test_list():
     result_arr = histogram1d(x_arr, bins=10, range=(0, 10))
 
     np.testing.assert_equal(result_list, result_arr)
+
+
+def test_non_contiguous():
+
+    x = np.random.random((10, 10, 10))[::2, ::3, :]
+    y = np.random.random((10, 10, 10))[::2, ::3, :]
+    w = np.random.random((10, 10, 10))[::2, ::3, :]
+
+    assert not x.flags.c_contiguous
+    assert not x.flags.f_contiguous
+
+    result_1 = histogram1d(x, bins=10, range=(0, 1))
+    result_2 = histogram1d(x.copy(), bins=10, range=(0, 1))
+
+    np.testing.assert_equal(result_1, result_2)
+
+    result_1 = histogram1d(x, bins=10, range=(0, 1), weights=w)
+    result_2 = histogram1d(x.copy(), bins=10, range=(0, 1), weights=w)
+
+    np.testing.assert_equal(result_1, result_2)
+
+    result_1 = histogram2d(x, y, bins=(10, 10), range=[(0, 1), (0, 1)])
+    result_2 = histogram2d(x.copy(), y.copy(), bins=(10, 10),
+                           range=[(0, 1), (0, 1)])
+
+    np.testing.assert_equal(result_1, result_2)
+
+    result_1 = histogram2d(x, y, bins=(10, 10), range=[(0, 1), (0, 1)], weights=w)
+    result_2 = histogram2d(x.copy(), y.copy(), bins=(10, 10),
+                           range=[(0, 1), (0, 1)], weights=w)
+
+    np.testing.assert_equal(result_1, result_2)

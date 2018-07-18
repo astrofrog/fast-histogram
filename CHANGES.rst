@@ -6,6 +6,9 @@
 
 - Avoid memory copies for non-native endian 64-bit float arrays. [#18]
 
+- Avoid memory copies for any numerical Numpy type and
+  non-contiguous arrays. [#23]
+
 0.4 (2018-02-12)
 ----------------
 
