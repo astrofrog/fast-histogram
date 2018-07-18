@@ -16,7 +16,7 @@ from ..histogram import histogram1d, histogram2d
        nx=st.integers(1, 10),
        xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
        weights=st.booleans(),
-       dtype=st.sampled_from(['>f8', '<f8']))
+       dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
 @settings(max_examples=5000)
 def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
 
@@ -29,7 +29,15 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
     else:
         w = None
 
-    reference = np.histogram(x, bins=nx, weights=w, range=(xmin, xmax))[0]
+    try:
+        reference = np.histogram(x, bins=nx, weights=w, range=(xmin, xmax))[0]
+    except ValueError:
+        if 'f4' in dtype:
+            # Numpy has a bug in certain corner cases
+            # https://github.com/numpy/numpy/issues/11586
+            return
+        else:
+            raise
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435
@@ -42,6 +50,13 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
 
     fast = histogram1d(x, bins=nx, weights=w, range=(xmin, xmax))
 
+    # Numpy returns results for 32-bit results as a 32-bit histogram, but only
+    # for 1D arrays. Since this is a summation variable it makes sense to
+    # return 64-bit, so rather than changing the behavior of histogram1d, we
+    # cast to 32-bit float here.
+    if 'f4' in dtype:
+        fast = fast.astype(np.float32)
+
     np.testing.assert_equal(fast, reference)
 
 
@@ -51,7 +66,7 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
        ny=st.integers(1, 10),
        ymin=st.floats(-1e10, 1e10), ymax=st.floats(-1e10, 1e10),
        weights=st.booleans(),
-       dtype=st.sampled_from(['>f8', '<f8']))
+       dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
 @settings(max_examples=5000)
 @example(size=5, nx=1, xmin=0.0, xmax=84.17833763374462, ny=1, ymin=-999999999.9999989, ymax=0.0, weights=False, dtype='<f8')
 @example(size=1, nx=1, xmin=-2.2204460492503135e-06, xmax=0.0, ny=1, ymin=0.0, ymax=1.1102230246251567e-05, weights=False, dtype='<f8')
