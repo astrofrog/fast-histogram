@@ -1,0 +1,26 @@
+language: python
+
+sudo: false
+
+python:
+  - 3.6
+
+addons:
+  apt:
+    packages:
+      mlocate
+
+install:
+  - pip install https://github.com/airspeed-velocity/asv/archive/master.zip
+  - asv machine --machine Travis --os unknown --arch unknown --cpu unknown --ram unknown
+
+# This auto-deploys the generated website to the gh-pages branch. This requires the
+# GITHUB_USER and GITHUB_API_KEY variables to be set as secure variables through
+# the Travis web interface. The former should be set to a GitHub username, and the
+# second to a personal access token with scope 'public_repo'
+
+script:
+  - asv gh-pages --no-push
+  - git config --global user.name "astrobot"
+  - git config --global user.email "astrobot"
+  - if [[ $TRAVIS_EVENT_TYPE != pull_request && $TRAVIS_BRANCH == results ]]; then git push -q -f https://$GITHUB_USER:$GITHUB_API_KEY@github.com/$TRAVIS_REPO_SLUG gh-pages; fi
