@@ -58,7 +58,8 @@
     //
     "matrix": {
         "numpy": ["1.14"],
-        "nomkl": []
+        "nomkl": [],
+        "cython": []
     },
 
     // Combinations of libraries/python versions can be excluded/included
