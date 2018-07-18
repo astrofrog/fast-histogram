@@ -1,0 +1,20 @@
+language: python
+
+sudo: false
+
+python:
+  - 3.6
+
+addons:
+  apt:
+    packages:
+      mlocate
+
+install:
+  - git clone git://github.com/astropy/ci-helpers.git
+  - source ci-helpers/travis/setup_conda.sh
+  - pip install asv
+  - asv machine --machine Travis --os unknown --arch unknown --cpu unknown --ram unknown
+
+script:
+  - asv run -q
