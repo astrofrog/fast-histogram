@@ -128,7 +128,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
   }
 
   /* The location of the data pointer which the iterator may update */
-  dataptr = (char **)NpyIter_GetDataPtrArray(iter);
+  dataptr = NpyIter_GetDataPtrArray(iter);
 
   /* The location of the stride which the iterator may update */
   strideptr = NpyIter_GetInnerStrideArray(iter);
@@ -178,7 +178,7 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   int ix, iy, nx, ny;
   double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy;
   PyObject *x_obj, *y_obj, *count_array;
-  PyArrayObject *x_array, *y_array;
+  PyArrayObject *x_array, *y_array, *arrays[2];
   npy_intp dims[2];
   double *count;
   NpyIter *iter;
@@ -237,8 +237,9 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
     return count_array;
   }
 
-  PyArrayObject *op[] = {x_array, y_array};
-  iter = NpyIter_AdvancedNew(2, op,
+  arrays[0] = x_array;
+  arrays[1] = y_array;
+  iter = NpyIter_AdvancedNew(2, arrays,
                              NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                              NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
                              -1, NULL, NULL, 0);
@@ -265,7 +266,7 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   }
 
   /* The location of the data pointer which the iterator may update */
-  dataptr = (char **)NpyIter_GetDataPtrArray(iter);
+  dataptr = NpyIter_GetDataPtrArray(iter);
 
   /* The location of the stride which the iterator may update */
   strideptr = NpyIter_GetInnerStrideArray(iter);
@@ -321,7 +322,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
   int ix, nx;
   double xmin, xmax, tx, tw, fnx, normx;
   PyObject *x_obj, *w_obj, *count_array;
-  PyArrayObject *x_array, *w_array;
+  PyArrayObject *x_array, *w_array, *arrays[2];
   npy_intp dims[1];
   double *count;
   NpyIter *iter;
@@ -379,8 +380,9 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
     return count_array;
   }
 
-  PyArrayObject *op[] = {x_array, w_array};
-  iter = NpyIter_AdvancedNew(2, op,
+  arrays[0] = x_array;
+  arrays[1] = w_array;
+  iter = NpyIter_AdvancedNew(2, arrays,
                              NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                              NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
                              -1, NULL, NULL, 0);
@@ -407,7 +409,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
   }
 
   /* The location of the data pointer which the iterator may update */
-  dataptr = (char **)NpyIter_GetDataPtrArray(iter);
+  dataptr = NpyIter_GetDataPtrArray(iter);
 
   /* The location of the stride which the iterator may update */
   strideptr = NpyIter_GetInnerStrideArray(iter);
@@ -460,7 +462,7 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   int ix, iy, nx, ny;
   double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy, tw;
   PyObject *x_obj, *y_obj, *w_obj, *count_array;
-  PyArrayObject *x_array, *y_array, *w_array;
+  PyArrayObject *x_array, *y_array, *w_array, *arrays[3];
   npy_intp dims[2];
   double *count;
   NpyIter *iter;
@@ -524,8 +526,10 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
     return count_array;
   }
 
-  PyArrayObject *op[] = {x_array, y_array, w_array};
-  iter = NpyIter_AdvancedNew(3, op,
+  arrays[0] = x_array;
+  arrays[1] = y_array;
+  arrays[2] = w_array;
+  iter = NpyIter_AdvancedNew(3, arrays,
                              NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                              NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
                              -1, NULL, NULL, 0);
@@ -554,7 +558,7 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   }
 
   /* The location of the data pointer which the iterator may update */
-  dataptr = (char **)NpyIter_GetDataPtrArray(iter);
+  dataptr = NpyIter_GetDataPtrArray(iter);
 
   /* The location of the stride which the iterator may update */
   strideptr = NpyIter_GetInnerStrideArray(iter);
