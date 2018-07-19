@@ -1,24 +1,21 @@
 import numpy as np
 from fast_histogram import histogram1d, histogram2d
 
-DTYPES = ['>i4', '<i4', '>i8', '<i8', '>f4', '<f4', '>f8', '<f8']
-x, y, w = {}, {}, {}
-for dtype in DTYPES:
-    x[dtype] = (np.random.random(1000000) * 10).astype(dtype)
-    y[dtype] = (np.random.random(1000000) * 10).astype(dtype)
-    w[dtype] = (np.random.random(1000000) * 10).astype(dtype)
+DTYPES = ['>i4', '<f4', '>f8', '<f8']
+SIZES = [1e3, 1e4, 1e5, 1e6, 1e7]
 
 
 class Histogram1D:
 
-    params = ([False, True], DTYPES)
-    param_names = ['fast', 'dtype']
+    params = ([False, True], DTYPES, SIZES)
+    param_names = ['fast', 'dtype', 'size']
 
-    def setup(self, fast, dtype):
-        self.x = x[dtype]
-        self.w = w[dtype]
+    def setup(self, fast, dtype, size):
+        np.random.seed(12345)
+        self.x = (np.random.random(int(size)) * 10).astype(dtype)
+        self.w = (np.random.random(int(size)) * 10).astype(dtype)
 
-    def time_histogram1d(self, fast, dtype):
+    def time_histogram1d(self, fast, dtype, size):
         if fast:
             try:
                 histogram1d(self.x, range=[-1, 2], bins=30)
@@ -27,7 +24,7 @@ class Histogram1D:
         else:
             np.histogram(self.x, range=[-1, 2], bins=30)
 
-    def time_histogram1d_weights(self, fast, dtype):
+    def time_histogram1d_weights(self, fast, dtype, size):
         if fast:
             histogram1d(self.x, range=[-1, 2], bins=30, weights=self.w)
         else:
@@ -36,15 +33,16 @@ class Histogram1D:
 
 class Histogram2D:
 
-    params = ([False, True], DTYPES)
-    param_names = ['fast', 'dtype']
+    params = ([False, True], DTYPES, SIZES)
+    param_names = ['fast', 'dtype', 'size']
 
-    def setup(self, fast, dtype):
-        self.x = x[dtype]
-        self.y = y[dtype]
-        self.w = y[dtype]
+    def setup(self, fast, dtype, size):
+        np.random.seed(12345)
+        self.x = (np.random.random(int(size)) * 10).astype(dtype)
+        self.y = (np.random.random(int(size)) * 10).astype(dtype)
+        self.w = (np.random.random(int(size)) * 10).astype(dtype)
 
-    def time_histogram2d(self, fast, dtype):
+    def time_histogram2d(self, fast, dtype, size):
         if fast:
             try:
                 histogram2d(self.x, self.y, range=[[-1, 2], [-2, 4]], bins=30)
@@ -53,7 +51,7 @@ class Histogram2D:
         else:
             np.histogram2d(self.x, self.y, range=[[-1, 2], [-2, 4]], bins=30)
 
-    def time_histogram2d_weights(self, fast, dtype):
+    def time_histogram2d_weights(self, fast, dtype, size):
         if fast:
             histogram2d(self.x, self.y, range=[[-1, 2], [-2, 4]], bins=30, weights=self.w)
         else:
