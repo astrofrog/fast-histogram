@@ -44,8 +44,8 @@ def time_stats(stmt=None, setup=None):
     return np.min(times) / number, np.mean(times) / number, np.median(times) / number
 
 
-FMT_HEADER = '# {:7s}' + ' {:10s}' * 8 + '\n'
-FMT = '{:9d}' + ' {:10.7e}' * 8 + '\n'
+FMT_HEADER = '# {:7s}' + ' {:10s}' * 12 + '\n'
+FMT = '{:9d}' + ' {:10.7e}' * 12 + '\n'
 
 with open('benchmark_times.txt', 'w') as f:
 
