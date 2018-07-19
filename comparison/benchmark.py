@@ -55,6 +55,8 @@ with open('benchmark_times.txt', 'w') as f:
 
         size = int(10 ** log10_size)
 
+        print('Running benchmarks for size={0}'.format(size))
+
         np_1d_mean, np_1d_std = average_time(stmt=NUMPY_1D_STMT, setup=SETUP_1D.format(size=size))
         fa_1d_mean, fa_1d_std = average_time(stmt=FAST_1D_STMT, setup=SETUP_1D.format(size=size))
         np_2d_mean, np_2d_std = average_time(stmt=NUMPY_2D_STMT, setup=SETUP_2D.format(size=size))
