@@ -1,0 +1,147 @@
+{
+    "benchmarks.Histogram1D.time_histogram1d": {
+        "code": "class Histogram1D:\n    def time_histogram1d(self, fast, dtype, size):\n        if fast:\n            try:\n                histogram1d(self.x, range=[-1, 2], bins=30)\n            except TypeError:  # old API\n                histogram1d(self.x, 30, -1, 2)\n        else:\n            np.histogram(self.x, range=[-1, 2], bins=30)\n\n    def setup(self, fast, dtype, size):\n        np.random.seed(12345)\n        self.x = (np.random.random(int(size)) * 10).astype(dtype)\n        self.w = (np.random.random(int(size)) * 10).astype(dtype)",
+        "name": "benchmarks.Histogram1D.time_histogram1d",
+        "number": 0,
+        "param_names": [
+            "fast",
+            "dtype",
+            "size"
+        ],
+        "params": [
+            [
+                "False",
+                "True"
+            ],
+            [
+                "'>i4'",
+                "'<f4'",
+                "'>f8'",
+                "'<f8'"
+            ],
+            [
+                "1000.0",
+                "10000.0",
+                "100000.0",
+                "1000000.0",
+                "10000000.0"
+            ]
+        ],
+        "repeat": 0,
+        "sample_time": 0.1,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "e671e48b4a56eddab60af10f82912a1cba894468a35436c61fadd8f0a42c42ce",
+        "warmup_time": -1
+    },
+    "benchmarks.Histogram1D.time_histogram1d_weights": {
+        "code": "class Histogram1D:\n    def time_histogram1d_weights(self, fast, dtype, size):\n        if fast:\n            histogram1d(self.x, range=[-1, 2], bins=30, weights=self.w)\n        else:\n            np.histogram(self.x, range=[-1, 2], bins=30, weights=self.w)\n\n    def setup(self, fast, dtype, size):\n        np.random.seed(12345)\n        self.x = (np.random.random(int(size)) * 10).astype(dtype)\n        self.w = (np.random.random(int(size)) * 10).astype(dtype)",
+        "name": "benchmarks.Histogram1D.time_histogram1d_weights",
+        "number": 0,
+        "param_names": [
+            "fast",
+            "dtype",
+            "size"
+        ],
+        "params": [
+            [
+                "False",
+                "True"
+            ],
+            [
+                "'>i4'",
+                "'<f4'",
+                "'>f8'",
+                "'<f8'"
+            ],
+            [
+                "1000.0",
+                "10000.0",
+                "100000.0",
+                "1000000.0",
+                "10000000.0"
+            ]
+        ],
+        "repeat": 0,
+        "sample_time": 0.1,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "4ce26c3fa2d76232a71eb27de69cdc29c1877457e62f92774b7fd8b6376c6685",
+        "warmup_time": -1
+    },
+    "benchmarks.Histogram2D.time_histogram2d": {
+        "code": "class Histogram2D:\n    def time_histogram2d(self, fast, dtype, size):\n        if fast:\n            try:\n                histogram2d(self.x, self.y, range=[[-1, 2], [-2, 4]], bins=30)\n            except TypeError:  # old API\n                histogram2d(self.x, self.y, 30, -1, 2, 30, -2, 4)\n        else:\n            np.histogram2d(self.x, self.y, range=[[-1, 2], [-2, 4]], bins=30)\n\n    def setup(self, fast, dtype, size):\n        np.random.seed(12345)\n        self.x = (np.random.random(int(size)) * 10).astype(dtype)\n        self.y = (np.random.random(int(size)) * 10).astype(dtype)\n        self.w = (np.random.random(int(size)) * 10).astype(dtype)",
+        "name": "benchmarks.Histogram2D.time_histogram2d",
+        "number": 0,
+        "param_names": [
+            "fast",
+            "dtype",
+            "size"
+        ],
+        "params": [
+            [
+                "False",
+                "True"
+            ],
+            [
+                "'>i4'",
+                "'<f4'",
+                "'>f8'",
+                "'<f8'"
+            ],
+            [
+                "1000.0",
+                "10000.0",
+                "100000.0",
+                "1000000.0",
+                "10000000.0"
+            ]
+        ],
+        "repeat": 0,
+        "sample_time": 0.1,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "c74f482a09eda4dfdbb5380538077d3477a6a3ecfcbadbe3013737a0fb2602af",
+        "warmup_time": -1
+    },
+    "benchmarks.Histogram2D.time_histogram2d_weights": {
+        "code": "class Histogram2D:\n    def time_histogram2d_weights(self, fast, dtype, size):\n        if fast:\n            histogram2d(self.x, self.y, range=[[-1, 2], [-2, 4]], bins=30, weights=self.w)\n        else:\n            np.histogram2d(self.x, self.y, range=[[-1, 2], [-2, 4]], bins=30, weights=self.w)\n\n    def setup(self, fast, dtype, size):\n        np.random.seed(12345)\n        self.x = (np.random.random(int(size)) * 10).astype(dtype)\n        self.y = (np.random.random(int(size)) * 10).astype(dtype)\n        self.w = (np.random.random(int(size)) * 10).astype(dtype)",
+        "name": "benchmarks.Histogram2D.time_histogram2d_weights",
+        "number": 0,
+        "param_names": [
+            "fast",
+            "dtype",
+            "size"
+        ],
+        "params": [
+            [
+                "False",
+                "True"
+            ],
+            [
+                "'>i4'",
+                "'<f4'",
+                "'>f8'",
+                "'<f8'"
+            ],
+            [
+                "1000.0",
+                "10000.0",
+                "100000.0",
+                "1000000.0",
+                "10000000.0"
+            ]
+        ],
+        "repeat": 0,
+        "sample_time": 0.1,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "321f640418ab3bae617c5a0d2b53a623adb06091393c79f6adffb711140c0af6",
+        "warmup_time": -1
+    },
+    "version": 2
+}
