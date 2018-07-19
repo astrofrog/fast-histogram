@@ -1,3 +1,5 @@
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #include <numpy/npy_math.h>
@@ -57,8 +59,8 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
   long n;
   int ix, nx;
   double xmin, xmax, tx, fnx, normx;
-  PyObject *x_obj, *count_array;
-  PyArrayObject *x_array;
+  PyObject *x_obj, *count_obj;
+  PyArrayObject *x_array, *count_array;
   npy_intp dims[1];
   double *count;
   NpyIter *iter;
@@ -88,19 +90,21 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
 
   /* Build the output array */
   dims[0] = nx;
-  count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-  if (count_array == NULL) {
+  count_obj = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+  if (count_obj == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
     Py_DECREF(x_array);
-    Py_XDECREF(count_array);
+    Py_XDECREF(count_obj);
     return NULL;
   }
+
+  count_array = (PyArrayObject *)count_obj;
 
   PyArray_FILLWBYTE(count_array, 0);
 
   if (n == 0) {
     Py_DECREF(x_array);
-    return count_array;
+    return count_obj;
   }
 
   dtype = PyArray_DescrFromType(NPY_DOUBLE);
@@ -110,7 +114,8 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     Py_DECREF(x_array);
-    Py_XDECREF(count_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -123,7 +128,8 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     NpyIter_Deallocate(iter);
     Py_DECREF(x_array);
-    Py_XDECREF(count_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -169,7 +175,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
   /* Clean up. */
   Py_DECREF(x_array);
 
-  return count_array;
+  return count_obj;
 }
 
 static PyObject *_histogram2d(PyObject *self, PyObject *args) {
@@ -177,8 +183,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   long n;
   int ix, iy, nx, ny;
   double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy;
-  PyObject *x_obj, *y_obj, *count_array;
-  PyArrayObject *x_array, *y_array, *arrays[2];
+  PyObject *x_obj, *y_obj, *count_obj;
+  PyArrayObject *x_array, *y_array, *count_array, *arrays[2];
   npy_intp dims[2];
   double *count;
   NpyIter *iter;
@@ -220,21 +226,23 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   /* Build the output array */
   dims[0] = nx;
   dims[1] = ny;
-  count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-  if (count_array == NULL) {
+  count_obj = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  if (count_obj == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
-    Py_XDECREF(count_array);
+    Py_XDECREF(count_obj);
     return NULL;
   }
+
+  count_array = (PyArrayObject *)count_obj;
 
   PyArray_FILLWBYTE(count_array, 0);
 
   if (n == 0) {
     Py_DECREF(x_array);
     Py_DECREF(y_array);
-    return count_array;
+    return count_obj;
   }
 
   arrays[0] = x_array;
@@ -247,7 +255,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
-    Py_XDECREF(count_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -261,7 +270,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
     NpyIter_Deallocate(iter);
     Py_DECREF(x_array);
     Py_DECREF(y_array);
-    Py_XDECREF(count_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -313,7 +323,7 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   Py_DECREF(x_array);
   Py_DECREF(y_array);
 
-  return count_array;
+  return count_obj;
 }
 
 static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
@@ -321,8 +331,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
   long n;
   int ix, nx;
   double xmin, xmax, tx, tw, fnx, normx;
-  PyObject *x_obj, *w_obj, *count_array;
-  PyArrayObject *x_array, *w_array, *arrays[2];
+  PyObject *x_obj, *w_obj, *count_obj;
+  PyArrayObject *x_array, *w_array, *count_array, *arrays[2];
   npy_intp dims[1];
   double *count;
   NpyIter *iter;
@@ -363,21 +373,23 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
 
   /* Build the output array */
   dims[0] = nx;
-  count_array = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
-  if (count_array == NULL) {
+  count_obj = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+  if (count_obj == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
     Py_DECREF(x_array);
     Py_DECREF(w_array);
-    Py_XDECREF(count_array);
+    Py_XDECREF(count_obj);
     return NULL;
   }
+
+  count_array = (PyArrayObject *)count_obj;
 
   PyArray_FILLWBYTE(count_array, 0);
 
   if (n == 0) {
     Py_DECREF(x_array);
     Py_DECREF(w_array);
-    return count_array;
+    return count_obj;
   }
 
   arrays[0] = x_array;
@@ -390,7 +402,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     Py_DECREF(x_array);
     Py_DECREF(w_array);
-    Py_XDECREF(count_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -404,7 +417,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
     NpyIter_Deallocate(iter);
     Py_DECREF(x_array);
     Py_DECREF(w_array);
-    Py_XDECREF(count_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -453,7 +467,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
   Py_DECREF(x_array);
   Py_DECREF(w_array);
 
-  return count_array;
+  return count_obj;
 }
 
 static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
@@ -461,8 +475,8 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   long n;
   int ix, iy, nx, ny;
   double xmin, xmax, tx, fnx, normx, ymin, ymax, ty, fny, normy, tw;
-  PyObject *x_obj, *y_obj, *w_obj, *count_array;
-  PyArrayObject *x_array, *y_array, *w_array, *arrays[3];
+  PyObject *x_obj, *y_obj, *w_obj, *count_obj;
+  PyArrayObject *x_array, *y_array, *w_array, *count_array, *arrays[3];
   npy_intp dims[2];
   double *count;
   NpyIter *iter;
@@ -507,15 +521,17 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   /* Build the output array */
   dims[0] = nx;
   dims[1] = ny;
-  count_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-  if (count_array == NULL) {
+  count_obj = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  if (count_obj == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(w_array);
-    Py_XDECREF(count_array);
+    Py_XDECREF(count_obj);
     return NULL;
   }
+
+  count_array = (PyArrayObject *)count_obj;
 
   PyArray_FILLWBYTE(count_array, 0);
 
@@ -523,7 +539,7 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(w_array);
-    return count_array;
+    return count_obj;
   }
 
   arrays[0] = x_array;
@@ -538,7 +554,8 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(w_array);
-    Py_XDECREF(count_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -553,7 +570,8 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(w_array);
-    Py_XDECREF(count_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -608,5 +626,5 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   Py_DECREF(y_array);
   Py_DECREF(w_array);
 
-  return count_array;
+  return count_obj;
 }
