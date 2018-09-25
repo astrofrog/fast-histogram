@@ -13,8 +13,6 @@ environment:
 
   matrix:
       - PYTHON_VERSION: "2.7"
-        NUMPY_VERSION: "1.9"
-      - PYTHON_VERSION: "2.7"
         NUMPY_VERSION: "1.10"
       - PYTHON_VERSION: "2.7"
         NUMPY_VERSION: "1.11"
