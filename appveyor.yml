@@ -12,10 +12,18 @@ environment:
       PIP_DEPENDENCIES: "hypothesis[numpy]"
 
   matrix:
-
       - PYTHON_VERSION: "2.7"
+        NUMPY_VERSION: "1.10"
+      - PYTHON_VERSION: "2.7"
+        NUMPY_VERSION: "1.11"
       - PYTHON_VERSION: "3.5"
+        NUMPY_VERSION: "1.12"
       - PYTHON_VERSION: "3.6"
+        NUMPY_VERSION: "1.13"
+      - PYTHON_VERSION: "3.6"
+        NUMPY_VERSION: "1.14"
+      - PYTHON_VERSION: "3.7"
+        NUMPY_VERSION: "1.15"
 
 platform:
     -x64
