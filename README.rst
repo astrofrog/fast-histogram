@@ -1,4 +1,4 @@
-|Travis Status| |AppVeyor Status| |asv|
+|Travis Status| |AppVeyor Status| |CircleCI Status| |asv|
 
 About
 -----
@@ -159,5 +159,8 @@ pull request to improve things.
 .. |AppVeyor Status| image:: https://ci.appveyor.com/api/projects/status/ek63g9haku5on0q2/branch/master?svg=true
    :target: https://ci.appveyor.com/project/astrofrog/fast-histogram
 
+.. |CircleCI Status| image:: https://circleci.com/gh/astrofrog/fast-histogram/tree/master.svg?style=svg
+   :target: https://circleci.com/gh/astrofrog/fast-histogram/tree/master
+    
 .. |asv| image:: https://img.shields.io/badge/benchmarked%20by-asv-brightgreen.svg
    :target: https://astrofrog.github.io/fast-histogram
