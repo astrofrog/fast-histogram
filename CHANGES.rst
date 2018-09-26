@@ -1,4 +1,4 @@
-0.5 (unreleased)
+0.5 (2018-09-26)
 ----------------
 
 - Fix bug that caused histograms of n-dimensional arrays to
