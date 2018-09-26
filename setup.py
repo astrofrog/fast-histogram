@@ -20,7 +20,7 @@ with io.open('README.rst', encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()
 
 setup(name='fast-histogram',
-      version='0.5',
+      version='0.6.dev0',
       description='Fast simple 1D and 2D histograms',
       long_description=LONG_DESCRIPTION,
       setup_requires=['numpy'],
