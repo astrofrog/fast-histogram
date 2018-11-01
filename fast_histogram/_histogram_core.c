@@ -149,6 +149,8 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
 
+  Py_BEGIN_ALLOW_THREADS
+
   do {
 
     /* Get the inner loop data/stride/count values */
@@ -169,6 +171,8 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
     }
 
   } while (iternext(iter));
+
+  Py_END_ALLOW_THREADS
 
   NpyIter_Deallocate(iter);
 
@@ -293,6 +297,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
 
+  Py_BEGIN_ALLOW_THREADS
+
   do {
 
     /* Get the inner loop data/stride/count values */
@@ -316,6 +322,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
     }
 
   } while (iternext(iter));
+
+  Py_END_ALLOW_THREADS
 
   NpyIter_Deallocate(iter);
 
@@ -438,6 +446,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
 
+  Py_BEGIN_ALLOW_THREADS
+
   do {
 
     /* Get the inner loop data/stride/count values */
@@ -460,6 +470,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
     }
 
   } while (iternext(iter));
+
+  Py_END_ALLOW_THREADS
 
   NpyIter_Deallocate(iter);
 
@@ -593,6 +605,8 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
 
+  Py_BEGIN_ALLOW_THREADS
+
   do {
 
     /* Get the inner loop data/stride/count values */
@@ -618,6 +632,8 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
     }
 
   } while (iternext(iter));
+
+  Py_END_ALLOW_THREADS
 
   NpyIter_Deallocate(iter);
 
