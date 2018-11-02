@@ -11,7 +11,7 @@ addons:
       mlocate
 
 install:
-  - pip install https://github.com/airspeed-velocity/asv/archive/master.zip
+  - pip install asv
   - asv machine --machine Travis --os unknown --arch unknown --cpu unknown --ram unknown
 
 # This auto-deploys the generated website to the gh-pages branch. This requires the
