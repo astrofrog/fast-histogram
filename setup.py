@@ -8,7 +8,12 @@ import io
 # rather than pip, and this can mean picking up pre-releases. See
 # https://mail.python.org/pipermail/numpy-discussion/2019-January/079097.html
 # for more details.
-import numpy
+try:
+    import numpy
+except ImportError:
+    raise ImportError("Numpy is required to install this package - either "
+                      "install it first or update to pip 10.0 or later for it "
+                      "to be automatically installed")
 
 from setuptools import setup
 from setuptools.extension import Extension
