@@ -1,7 +1,9 @@
-0.6 (unreleased)
+0.6 (2019-01-07)
 ----------------
 
-- No changes yet.
+- Define numpy as a build-time dependency in pyproject.toml. [#33]
+
+- Release the GIL during calculations in C code. [#31]
 
 0.5 (2018-09-26)
 ----------------
