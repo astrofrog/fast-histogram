@@ -55,15 +55,17 @@ jobs:
             cd tmp
             python3 -c 'import fast_histogram'
             cd ..
-      - run:
-          name: Test install with pinned Numpy
-          command: |
-            virtualenv pinned
-            source pinned/bin/activate
-            pip3 install . numpy==1.12.1
-            cd tmp
-            python3 -c 'import fast_histogram'
-            cd ..
+      # The following doesn't work, but could work one day when we implement
+      # pyproject.toml with the oldest numpy version for each Python version.
+      # - run:
+      #     name: Test install with pinned Numpy
+      #     command: |
+      #       virtualenv pinned
+      #       source pinned/bin/activate
+      #       pip3 install . numpy==1.12.1
+      #       cd tmp
+      #       python3 -c 'import fast_histogram'
+      #       cd ..
 
 workflows:
   version: 2
