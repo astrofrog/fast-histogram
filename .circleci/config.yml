@@ -1,7 +1,9 @@
 version: 2
 
 jobs:
-  build:
+
+  # Run the tests with 32-bit Python
+  32bit:
     docker:
       - image: quay.io/pypa/manylinux1_i686
     steps:
@@ -15,3 +17,59 @@ jobs:
       - run:
           name: Run tests
           command: /opt/python/cp36-cp36m/bin/pytest fast_histogram -p no:warnings --hypothesis-show-statistics
+
+  # The following tests are to make sure that we deal correctly with numpy
+  # as a build requirement.
+  numpy:
+    docker:
+      - image: ubuntu:16.04
+    steps:
+      - checkout
+      - run:
+          name: Install Python
+          command: |
+            apt-get update
+            apt-get install -y python3 python3-dev python3-pip python3-wheel
+      - run:
+          name: Install virtualenv
+          command: pip3 install virtualenv
+      - run:
+          name: Make temporary directory for testing imports
+          command: mkdir tmp
+      - run:
+          name: Test default install
+          command: |
+            virtualenv default
+            source default/bin/activate
+            pip3 install .
+            cd tmp
+            python3 -c 'import fast_histogram'
+            cd ..
+      - run:
+          name: Test install with pre-existing Numpy
+          command: |
+            virtualenv pre
+            source pre/bin/activate
+            pip3 install numpy==1.12.1
+            pip3 install .
+            cd tmp
+            python3 -c 'import fast_histogram'
+            cd ..
+      # The following doesn't work, but could work one day when we implement
+      # pyproject.toml with the oldest numpy version for each Python version.
+      # - run:
+      #     name: Test install with pinned Numpy
+      #     command: |
+      #       virtualenv pinned
+      #       source pinned/bin/activate
+      #       pip3 install . numpy==1.12.1
+      #       cd tmp
+      #       python3 -c 'import fast_histogram'
+      #       cd ..
+
+workflows:
+  version: 2
+  tests_and_docs:
+    jobs:
+      - 32bit
+      - numpy
