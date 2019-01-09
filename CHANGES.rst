@@ -1,7 +1,7 @@
-0.7 (unreleased)
+0.7 (2019-01-09)
 ----------------
 
-- No changes yet.
+- Fix definition of numpy as a build-time dependency. [#36]
 
 0.6 (2019-01-07)
 ----------------

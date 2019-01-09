@@ -33,7 +33,7 @@ else:
     setup_requires = []
 
 setup(name='fast-histogram',
-      version='0.7.dev0',
+      version='0.7',
       description='Fast simple 1D and 2D histograms',
       long_description=LONG_DESCRIPTION,
       setup_requires=setup_requires ,
