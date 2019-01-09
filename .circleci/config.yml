@@ -48,8 +48,8 @@ jobs:
       - run:
           name: Test install with pre-existing Numpy
           command: |
-            virtualenv default
-            source default/bin/activate
+            virtualenv pre
+            source pre/bin/activate
             pip3 install numpy==1.12.1
             pip3 install .
             cd tmp
@@ -58,8 +58,8 @@ jobs:
       - run:
           name: Test install with pinned Numpy
           command: |
-            virtualenv default
-            source default/bin/activate
+            virtualenv pinned
+            source pinned/bin/activate
             pip3 install . numpy==1.12.1
             cd tmp
             python3 -c 'import fast_histogram'
