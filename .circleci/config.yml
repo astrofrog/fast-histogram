@@ -34,12 +34,17 @@ jobs:
           name: Install virtualenv
           command: pip3 install virtualenv
       - run:
+          name: Make temporary directory for testing imports
+          command: mkdir tmp
+      - run:
           name: Test default install
           command: |
             virtualenv default
             source default/bin/activate
             pip3 install .
+            cd tmp
             python3 -c 'import fast_histogram'
+            cd ..
       - run:
           name: Test install with pre-existing Numpy
           command: |
@@ -47,14 +52,18 @@ jobs:
             source default/bin/activate
             pip3 install numpy==1.12.1
             pip3 install .
+            cd tmp
             python3 -c 'import fast_histogram'
+            cd ..
       - run:
           name: Test install with pinned Numpy
           command: |
             virtualenv default
             source default/bin/activate
             pip3 install . numpy==1.12.1
+            cd tmp
             python3 -c 'import fast_histogram'
+            cd ..
 
 workflows:
   version: 2
