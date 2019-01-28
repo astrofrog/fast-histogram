@@ -7,12 +7,13 @@ import numpy as np
 from ._histogram_core import (_histogram1d,
                               _histogram2d,
                               _histogram1d_weighted,
-                              _histogram2d_weighted)
+                              _histogram2d_weighted,
+                              _histogram1d_returnsumw2)
 
 __all__ = ['histogram1d', 'histogram2d']
 
 
-def histogram1d(x, bins, range, weights=None):
+def histogram1d(x, bins, range, weights=None, sumw2=False):
     """
     Compute a 1D histogram assuming equally spaced bins.
 
@@ -26,6 +27,8 @@ def histogram1d(x, bins, range, weights=None):
         The range as a tuple of (xmin, xmax)
     weights : `~numpy.ndarray`
         The weights of the points in the 1D histogram
+    sumw2 : bool
+        Return the sum of weights squared (requires weights)
 
     Returns
     -------
@@ -53,9 +56,14 @@ def histogram1d(x, bins, range, weights=None):
         raise ValueError("nx should be strictly positive")
 
     if weights is None:
+        if sumw2:
+            raise ValueError("Using sumw2=True requires a weights array")
         return _histogram1d(x, nx, xmin, xmax)
     else:
-        return _histogram1d_weighted(x, weights, nx, xmin, xmax)
+        if sumw2:
+            return _histogram1d_returnsumw2(x, weights, nx, xmin, xmax)
+        else:
+            return _histogram1d_weighted(x, weights, nx, xmin, xmax)
 
 
 def histogram2d(x, y, bins, range, weights=None):

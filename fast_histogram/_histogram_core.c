@@ -10,12 +10,14 @@ static char _histogram1d_docstring[] = "Compute a 1D histogram";
 static char _histogram2d_docstring[] = "Compute a 2D histogram";
 static char _histogram1d_weighted_docstring[] = "Compute a weighted 1D histogram";
 static char _histogram2d_weighted_docstring[] = "Compute a weighted 2D histogram";
+static char _histogram1d_returnsumw2_docstring[] = "Compute weighted 1D histogram and return sum of weights squared";
 
 /* Declare the C functions here. */
 static PyObject *_histogram1d(PyObject *self, PyObject *args);
 static PyObject *_histogram2d(PyObject *self, PyObject *args);
 static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args);
 static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args);
+static PyObject *_histogram1d_returnsumw2(PyObject *self, PyObject *args);
 
 /* Define the methods that will be available on the module. */
 static PyMethodDef module_methods[] = {
@@ -23,6 +25,7 @@ static PyMethodDef module_methods[] = {
     {"_histogram2d", _histogram2d, METH_VARARGS, _histogram2d_docstring},
     {"_histogram1d_weighted", _histogram1d_weighted, METH_VARARGS, _histogram1d_weighted_docstring},
     {"_histogram2d_weighted", _histogram2d_weighted, METH_VARARGS, _histogram2d_weighted_docstring},
+    {"_histogram1d_returnsumw2", _histogram1d_returnsumw2, METH_VARARGS, _histogram1d_returnsumw2_docstring},
     {NULL, NULL, 0, NULL}
 };
 
@@ -643,4 +646,162 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   Py_DECREF(w_array);
 
   return count_obj;
+}
+
+static PyObject *_histogram1d_returnsumw2(PyObject *self, PyObject *args) {
+
+  long n;
+  int ix, nx;
+  double xmin, xmax, tx, tw, fnx, normx;
+  PyObject *x_obj, *w_obj, *count_obj, *sumw2_obj;
+  PyArrayObject *x_array, *w_array, *count_array, *sumw2_array, *arrays[2];
+  npy_intp dims[1];
+  double *count, *sumw2;
+  NpyIter *iter;
+  NpyIter_IterNextFunc *iternext;
+  char **dataptr;
+  npy_intp *strideptr, *innersizeptr;
+  PyArray_Descr *dtypes[] = {PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE)};
+  npy_uint32 op_flags[] = {NPY_ITER_READONLY, NPY_ITER_READONLY};
+
+  /* Parse the input tuple */
+  if (!PyArg_ParseTuple(args, "OOidd", &x_obj, &w_obj, &nx, &xmin, &xmax)) {
+    PyErr_SetString(PyExc_TypeError, "Error parsing input");
+    return NULL;
+  }
+
+  /* Interpret the input objects as `numpy` arrays. */
+  x_array = (PyArrayObject *)PyArray_FROM_O(x_obj);
+  w_array = (PyArrayObject *)PyArray_FROM_O(w_obj);
+
+  /* If that didn't work, throw an `Exception`. */
+  if (x_array == NULL || w_array == NULL) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays.");
+    Py_XDECREF(x_array);
+    Py_XDECREF(w_array);
+    return NULL;
+  }
+
+  /* How many data points are there? */
+  n = (long)PyArray_DIM(x_array, 0);
+
+  /* Check the dimensions. */
+  if (n != (long)PyArray_DIM(w_array, 0)) {
+    PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x and w");
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    return NULL;
+  }
+
+  /* Build the output array */
+  dims[0] = nx;
+  count_obj = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+  sumw2_obj = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+  if (count_obj == NULL || sumw2_obj == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't build output array");
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    Py_XDECREF(count_obj);
+    Py_XDECREF(sumw2_obj);
+    return NULL;
+  }
+
+  count_array = (PyArrayObject *)count_obj;
+  sumw2_array = (PyArrayObject *)sumw2_obj;
+
+  PyArray_FILLWBYTE(count_array, 0);
+  PyArray_FILLWBYTE(sumw2_array, 0);
+
+  if (n == 0) {
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    return count_obj;
+  }
+
+  arrays[0] = x_array;
+  arrays[1] = w_array;
+  iter = NpyIter_AdvancedNew(2, arrays,
+                             NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
+                             NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
+                             -1, NULL, NULL, 0);
+  if (iter == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
+    Py_DECREF(sumw2_obj);
+    Py_DECREF(sumw2_array);
+    return NULL;
+  }
+
+  /*
+   * The iternext function gets stored in a local variable
+   * so it can be called repeatedly in an efficient manner.
+   */
+  iternext = NpyIter_GetIterNext(iter, NULL);
+  if (iternext == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
+    NpyIter_Deallocate(iter);
+    Py_DECREF(x_array);
+    Py_DECREF(w_array);
+    Py_DECREF(count_obj);
+    Py_DECREF(count_array);
+    Py_DECREF(sumw2_obj);
+    Py_DECREF(sumw2_array);
+    return NULL;
+  }
+
+  /* The location of the data pointer which the iterator may update */
+  dataptr = NpyIter_GetDataPtrArray(iter);
+
+  /* The location of the stride which the iterator may update */
+  strideptr = NpyIter_GetInnerStrideArray(iter);
+
+  /* The location of the inner loop size which the iterator may update */
+  innersizeptr = NpyIter_GetInnerLoopSizePtr(iter);
+
+  /* Pre-compute variables for efficiency in the histogram calculation */
+  fnx = nx;
+  normx = 1. / (xmax - xmin);
+
+  /* Get C array for output array */
+  count = (double *)PyArray_DATA(count_array);
+  sumw2 = (double *)PyArray_DATA(sumw2_array);
+
+  Py_BEGIN_ALLOW_THREADS
+
+  do {
+
+    /* Get the inner loop data/stride/count values */
+    npy_intp stride = *strideptr;
+    npy_intp size = *innersizeptr;
+
+    /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
+    while (size--) {
+
+      tx = *(double *)dataptr[0];
+      tw = *(double *)dataptr[1];
+
+      if (tx >= xmin && tx < xmax) {
+        ix = (tx - xmin) * normx * fnx;
+        count[ix] += tw;
+        sumw2[ix] += tw * tw;
+      }
+
+      dataptr[0] += stride;
+      dataptr[1] += stride;
+    }
+
+  } while (iternext(iter));
+
+  Py_END_ALLOW_THREADS
+
+  NpyIter_Deallocate(iter);
+
+  /* Clean up. */
+  Py_DECREF(x_array);
+  Py_DECREF(w_array);
+
+  return Py_BuildValue("OO", count_obj, sumw2_obj);
 }
