@@ -5,7 +5,7 @@
 #include <numpy/npy_math.h>
 
 /* Define docstrings */
-static char module_docstring[] = "Fast histogram functioins";
+static char module_docstring[] = "Fast histogram functions";
 static char _histogram1d_docstring[] = "Compute a 1D histogram";
 static char _histogram2d_docstring[] = "Compute a 2D histogram";
 static char _histogram1d_weighted_docstring[] = "Compute a weighted 1D histogram";
