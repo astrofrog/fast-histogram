@@ -2,7 +2,7 @@ import numpy as np
 
 import pytest
 
-from hypothesis import given, settings, example, assume
+from hypothesis import given, settings, assume
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 
