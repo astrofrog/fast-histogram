@@ -46,7 +46,8 @@ def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights):
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435
-    inside = (x <= xmax) & (x >= xmin)
+    # FIXME: for now use < since that's what our algorithm does
+    inside = (x < xmax) & (x >= xmin)
     if weights:
         assume(np.allclose(np.sum(w[inside]), np.sum(reference)))
     else:
@@ -98,8 +99,9 @@ def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights):
         return
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
-    # bug report https://github.com/numpy/numpy/issues/9435
-    inside = (x <= xmax) & (x >= xmin) & (y <= ymax) & (y >= ymin)
+    # bug report https://github.com/numpy/numpy/issues/9435.
+    # FIXME: for now use < since that's what our algorithm does
+    inside = (x < xmax) & (x >= xmin) & (y < ymax) & (y >= ymin)
     if weights:
         assume(np.allclose(np.sum(w[inside]), np.sum(reference)))
     else:
