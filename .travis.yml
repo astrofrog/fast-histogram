@@ -9,7 +9,7 @@ os:
 env:
   global:
     - CONDA_DEPENDENCIES="numpy pytest nomkl"
-    - PIP_DEPENDENCIES="hypothesis[numpy]"
+    - PIP_DEPENDENCIES="hypothesis[numpy]<4"
   matrix:
     - PYTHON_VERSION=2.7 NUMPY_VERSION=1.10
     - PYTHON_VERSION=2.7 NUMPY_VERSION=1.11

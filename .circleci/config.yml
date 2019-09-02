@@ -10,7 +10,7 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: /opt/python/cp36-cp36m/bin/pip install numpy pytest hypothesis[numpy]
+          command: /opt/python/cp36-cp36m/bin/pip install numpy pytest "hypothesis[numpy]<4"
       - run:
           name: Build extension
           command: /opt/python/cp36-cp36m/bin/python setup.py build_ext --inplace

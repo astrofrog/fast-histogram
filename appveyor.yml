@@ -9,7 +9,7 @@ environment:
                         # to the matrix section.
 
       CONDA_DEPENDENCIES: "cython numpy pytest"
-      PIP_DEPENDENCIES: "hypothesis[numpy]"
+      PIP_DEPENDENCIES: "hypothesis[numpy]<4"
 
   matrix:
       - PYTHON_VERSION: "2.7"
