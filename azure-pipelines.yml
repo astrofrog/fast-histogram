@@ -6,6 +6,17 @@ resources:
     name: OpenAstronomy/azure-pipelines-templates
     ref: master
 
+trigger:
+  branches:
+    include:
+    - '*'
+  tags:
+    include:
+    - 'v*'
+
+variables:
+  CIBW_BUILD: cp36-* cp37-* cp38-*
+
 jobs:
 
 - template: run-tox-env.yml@OpenAstronomy
@@ -20,7 +31,7 @@ jobs:
     - linux32: py36-test-numpy115
     - linux32: py37-test-numpy116
     - linux32: py37-test-numpy117
-    # - linux32: py38-test-numpy118
+    - linux32: py38-test-numpy118
 
     - linux: py36-test-numpy113
     - linux: py36-test-numpy114
@@ -42,3 +53,15 @@ jobs:
     - windows: py37-test-numpy116
     - windows: py37-test-numpy117
     - windows: py38-test-numpy118
+
+- template: publish.yml@OpenAstronomy
+  parameters:
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
+      pypi_connection_name: 'pypi_endpoint'
+    test_extras: test
+    test_command: pytest --pyargs fast_histogram
+    targets:
+    - sdist
+    - wheels_linux
+    - wheels_macos
+    - wheels_windows
