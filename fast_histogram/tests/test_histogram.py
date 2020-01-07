@@ -21,7 +21,7 @@ from ..histogram import histogram1d, histogram2d
        xmax=st.floats(-1e10, 1e10),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
-@settings(max_examples=5000)
+@settings(max_examples=500)
 def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
 
     if xmax <= xmin:
@@ -80,7 +80,7 @@ def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
        ymin=st.floats(-1e10, 1e10), ymax=st.floats(-1e10, 1e10),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
-@settings(max_examples=5000)
+@settings(max_examples=500)
 def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, dtype):
 
     if xmax <= xmin or ymax <= ymin:
