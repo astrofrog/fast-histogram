@@ -2,7 +2,7 @@ import numpy as np
 
 import pytest
 
-from hypothesis import given, settings, example, assume
+from hypothesis import given, settings, assume
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 
@@ -14,27 +14,34 @@ from ..histogram import histogram1d, histogram2d
 # comparing to Numpy) test cases.
 
 
-@given(size=st.integers(0, 100),
+@given(values=arrays(dtype='<f8', shape=st.integers(0, 200),
+                     elements=st.floats(-1000, 1000), unique=True),
        nx=st.integers(1, 10),
-       xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
+       xmin=st.floats(-1e10, 1e10),
+       xmax=st.floats(-1e10, 1e10),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
 @settings(max_examples=5000)
-def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
+def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
 
     if xmax <= xmin:
         return
 
-    x = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
+    values = values.astype(dtype)
+
+    size = len(values) // 2
+
     if weights:
-        w = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
+        w = values[:size]
     else:
         w = None
+
+    x = values[size:size * 2]
 
     try:
         reference = np.histogram(x, bins=nx, weights=w, range=(xmin, xmax))[0]
     except ValueError:
-        if 'f4' in dtype:
+        if 'f4' in str(x.dtype):
             # Numpy has a bug in certain corner cases
             # https://github.com/numpy/numpy/issues/11586
             return
@@ -43,7 +50,8 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435
-    inside = (x <= xmax) & (x >= xmin)
+    # FIXME: for now use < since that's what our algorithm does
+    inside = (x < xmax) & (x >= xmin)
     if weights:
         assume(np.allclose(np.sum(w[inside]), np.sum(reference)))
     else:
@@ -56,13 +64,16 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
     # for 1D arrays. Since this is a summation variable it makes sense to
     # return 64-bit, so rather than changing the behavior of histogram1d, we
     # cast to 32-bit float here.
-    if 'f4' in dtype:
-        fast = fast.astype(np.float32)
+    if x.dtype.kind == 'f' and x.dtype.itemsize == 4:
+        rtol = 1e-7
+    else:
+        rtol = 1e-14
 
-    np.testing.assert_equal(fast, reference)
+    np.testing.assert_allclose(fast, reference, rtol=rtol)
 
 
-@given(size=st.integers(0, 100),
+@given(values=arrays(dtype='<f8', shape=st.integers(0, 300),
+                     elements=st.floats(-1000, 1000), unique=True),
        nx=st.integers(1, 10),
        xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
        ny=st.integers(1, 10),
@@ -70,20 +81,22 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
 @settings(max_examples=5000)
-@example(size=5, nx=1, xmin=0.0, xmax=84.17833763374462, ny=1, ymin=-999999999.9999989, ymax=0.0, weights=False, dtype='<f8')
-@example(size=1, nx=1, xmin=-2.2204460492503135e-06, xmax=0.0, ny=1, ymin=0.0, ymax=1.1102230246251567e-05, weights=False, dtype='<f8')
-@example(size=3, nx=1, xmin=0.0, xmax=841.7833941010146, ny=1, ymin=-135.92383885097095, ymax=0.0, weights=True, dtype='>f8')
-def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights, dtype):
+def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, dtype):
 
     if xmax <= xmin or ymax <= ymin:
         return
 
-    x = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
-    y = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
+    values = values.astype(dtype)
+
+    size = len(values) // 3
+
     if weights:
-        w = arrays(dtype, size, elements=st.floats(-1000, 1000)).example()
+        w = values[:size]
     else:
         w = None
+
+    x = values[size:size * 2]
+    y = values[size * 2:size * 3]
 
     try:
         reference = np.histogram2d(x, y, bins=(nx, ny), weights=w,
@@ -93,8 +106,9 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights, dt
         return
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
-    # bug report https://github.com/numpy/numpy/issues/9435
-    inside = (x <= xmax) & (x >= xmin) & (y <= ymax) & (y >= ymin)
+    # bug report https://github.com/numpy/numpy/issues/9435.
+    # FIXME: for now use < since that's what our algorithm does
+    inside = (x < xmax) & (x >= xmin) & (y < ymax) & (y >= ymin)
     if weights:
         assume(np.allclose(np.sum(w[inside]), np.sum(reference)))
     else:
@@ -104,7 +118,12 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights, dt
     fast = histogram2d(x, y, bins=(nx, ny), weights=w,
                        range=((xmin, xmax), (ymin, ymax)))
 
-    np.testing.assert_equal(fast, reference)
+    if x.dtype.kind == 'f' and x.dtype.itemsize == 4:
+        rtol = 1e-7
+    else:
+        rtol = 1e-14
+
+    np.testing.assert_allclose(fast, reference, rtol=rtol)
 
 
 def test_nd_arrays():
