@@ -1,7 +1,8 @@
 0.8 (unreleased)
 ----------------
 
-- No changes yet.
+- Fixed compatibility of test suite with latest version of the
+  hypothesis package. [#40]
 
 0.7 (2019-01-09)
 ----------------

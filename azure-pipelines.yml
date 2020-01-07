@@ -1,0 +1,44 @@
+resources:
+  repositories:
+  - repository: OpenAstronomy
+    type: github
+    endpoint: astrofrog
+    name: OpenAstronomy/azure-pipelines-templates
+    ref: master
+
+jobs:
+
+- template: run-tox-env.yml@OpenAstronomy
+  parameters:
+
+    coverage: codecov
+
+    envs:
+
+    - linux32: py36-test-numpy113
+    - linux32: py36-test-numpy114
+    - linux32: py36-test-numpy115
+    - linux32: py37-test-numpy116
+    - linux32: py37-test-numpy117
+    # - linux32: py38-test-numpy118
+
+    - linux: py36-test-numpy113
+    - linux: py36-test-numpy114
+    - linux: py36-test-numpy115
+    - linux: py37-test-numpy116
+    - linux: py37-test-numpy117
+    - linux: py38-test-numpy118
+
+    - macos: py36-test-numpy113
+    - macos: py36-test-numpy114
+    - macos: py36-test-numpy115
+    - macos: py37-test-numpy116
+    - macos: py37-test-numpy117
+    - macos: py38-test-numpy118
+
+    - windows: py36-test-numpy113
+    - windows: py36-test-numpy114
+    - windows: py36-test-numpy115
+    - windows: py37-test-numpy116
+    - windows: py37-test-numpy117
+    - windows: py38-test-numpy118
