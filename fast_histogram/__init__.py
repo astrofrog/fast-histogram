@@ -1,3 +1,2 @@
 from .histogram import *
-
-__version__ = "0.8.dev0"
+from .version import version as __version__
