@@ -31,7 +31,7 @@ jobs:
     - linux32: py36-test-numpy115
     - linux32: py37-test-numpy116
     - linux32: py37-test-numpy117
-    # - linux32: py38-test-numpy118
+    - linux32: py38-test-numpy118
 
     - linux: py36-test-numpy113
     - linux: py36-test-numpy114
