@@ -1,4 +1,4 @@
-0.8 (unreleased)
+0.8 (2020-01-07)
 ----------------
 
 - Fixed compatibility of test suite with latest version of the
