@@ -302,7 +302,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   do {
 
     /* Get the inner loop data/stride/count values */
-    npy_intp stride = *strideptr;
+    npy_intp stride0 = strideptr[0];
+    npy_intp stride1 = strideptr[1];
     npy_intp size = *innersizeptr;
 
     /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
@@ -317,8 +318,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
         count[iy + ny * ix] += 1.;
       }
 
-      dataptr[0] += stride;
-      dataptr[1] += stride;
+      dataptr[0] += stride0;
+      dataptr[1] += stride1;
     }
 
   } while (iternext(iter));
@@ -451,7 +452,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
   do {
 
     /* Get the inner loop data/stride/count values */
-    npy_intp stride = *strideptr;
+    npy_intp stride0 = strideptr[0];
+    npy_intp stride1 = strideptr[1];
     npy_intp size = *innersizeptr;
 
     /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
@@ -465,8 +467,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
         count[ix] += tw;
       }
 
-      dataptr[0] += stride;
-      dataptr[1] += stride;
+      dataptr[0] += stride0;
+      dataptr[1] += stride1;
     }
 
   } while (iternext(iter));
@@ -610,7 +612,9 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   do {
 
     /* Get the inner loop data/stride/count values */
-    npy_intp stride = *strideptr;
+    npy_intp stride0 = strideptr[0];
+    npy_intp stride1 = strideptr[1];
+    npy_intp stride2 = strideptr[2];
     npy_intp size = *innersizeptr;
 
     /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
@@ -626,9 +630,9 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
         count[iy + ny * ix] += tw;
       }
 
-      dataptr[0] += stride;
-      dataptr[1] += stride;
-      dataptr[2] += stride;
+      dataptr[0] += stride0;
+      dataptr[1] += stride1;
+      dataptr[2] += stride2;
     }
 
   } while (iternext(iter));

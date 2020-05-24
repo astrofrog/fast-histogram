@@ -1,3 +1,11 @@
+0.9 (unreleased)
+----------------
+
+- Fixed a bug that caused incorrect results in the weighted
+  1-d histogram and the weighted and unweighted 2-d histogram
+  functions if using arrays with different layouts in memory.
+  [#52]
+
 0.8 (2020-01-07)
 ----------------
 
