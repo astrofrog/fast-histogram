@@ -1,4 +1,4 @@
-0.9 (unreleased)
+0.9 (2020-05-24)
 ----------------
 
 - Fixed a bug that caused incorrect results in the weighted
