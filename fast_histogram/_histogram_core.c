@@ -144,7 +144,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
 
   /* Pre-compute variables for efficiency in the histogram calculation */
   fnx = nx;
-  normx = 1. / (xmax - xmin);
+  normx = fnx / (xmax - xmin);
 
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
@@ -163,7 +163,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
       tx = *(double *)dataptr[0];
 
       if (tx >= xmin && tx < xmax) {
-        ix = (tx - xmin) * normx * fnx;
+        ix = (tx - xmin) * normx;
         count[ix] += 1.;
       }
 
@@ -291,8 +291,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   /* Pre-compute variables for efficiency in the histogram calculation */
   fnx = nx;
   fny = ny;
-  normx = 1. / (xmax - xmin);
-  normy = 1. / (ymax - ymin);
+  normx = fnx / (xmax - xmin);
+  normy = fny / (ymax - ymin);
 
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
@@ -313,8 +313,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
       ty = *(double *)dataptr[1];
 
       if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
-        ix = (tx - xmin) * normx * fnx;
-        iy = (ty - ymin) * normy * fny;
+        ix = (tx - xmin) * normx;
+        iy = (ty - ymin) * normy;
         count[iy + ny * ix] += 1.;
       }
 
@@ -442,7 +442,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
 
   /* Pre-compute variables for efficiency in the histogram calculation */
   fnx = nx;
-  normx = 1. / (xmax - xmin);
+  normx = fnx / (xmax - xmin);
 
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
@@ -463,7 +463,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
       tw = *(double *)dataptr[1];
 
       if (tx >= xmin && tx < xmax) {
-        ix = (tx - xmin) * normx * fnx;
+        ix = (tx - xmin) * normx;
         count[ix] += tw;
       }
 
@@ -601,8 +601,8 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   /* Pre-compute variables for efficiency in the histogram calculation */
   fnx = nx;
   fny = ny;
-  normx = 1. / (xmax - xmin);
-  normy = 1. / (ymax - ymin);
+  normx = fnx / (xmax - xmin);
+  normy = fny / (ymax - ymin);
 
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
@@ -625,8 +625,8 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
       tw = *(double *)dataptr[2];
 
       if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
-        ix = (tx - xmin) * normx * fnx;
-        iy = (ty - ymin) * normy * fny;
+        ix = (tx - xmin) * normx;
+        iy = (ty - ymin) * normy;
         count[iy + ny * ix] += tw;
       }
 
