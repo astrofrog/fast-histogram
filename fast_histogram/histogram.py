@@ -6,10 +6,11 @@ import numpy as np
 
 from ._histogram_core import (_histogram1d,
                               _histogram2d,
+                              _histogramdd,
                               _histogram1d_weighted,
                               _histogram2d_weighted)
 
-__all__ = ['histogram1d', 'histogram2d']
+__all__ = ['histogram1d', 'histogram2d', 'histogramdd']
 
 
 def histogram1d(x, bins, range, weights=None):
@@ -119,3 +120,17 @@ def histogram2d(x, y, bins, range, weights=None):
         return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
     else:
         return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax)
+
+def histogramdd(sample, bins, range):
+    """
+    Compute a histogram in arbitrarily high dimensions.
+    
+    Parameters
+    ----------
+    sample : tuple of `~numpy.ndarray`
+        The position of the points to bin in the histogram. Each array in the tuple
+        contains the coordinates of one dimension.
+    
+    """
+    
+    return _histogramdd(sample, bins.astype(np.intp), range.astype(np.double))
