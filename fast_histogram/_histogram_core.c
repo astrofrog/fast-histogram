@@ -394,6 +394,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     }
     Py_XDECREF(range);
     Py_XDECREF(bins);
+    free(arrays);
     return NULL;
   }
   
@@ -408,6 +409,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
         }
         Py_XDECREF(range);
         Py_XDECREF(bins);
+        free(arrays);
         return NULL;
       }
     }
@@ -423,6 +425,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     }
     Py_XDECREF(range);
     Py_XDECREF(bins);
+    free(arrays);
     return NULL;
   }
   iternext = NpyIter_GetIterNext(iter, NULL);
@@ -434,6 +437,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     NpyIter_Deallocate(iter);
     Py_XDECREF(range);
     Py_XDECREF(bins);
+    free(arrays);
     return NULL;
   }
   dataptr = NpyIter_GetDataPtrArray(iter);
@@ -455,6 +459,8 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     Py_XDECREF(range);
     Py_XDECREF(bins);
     Py_XDECREF(count_obj);
+    free(arrays);
+    free(dims);
     return NULL;
   }
 
@@ -468,6 +474,8 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     }
     Py_XDECREF(range);
     Py_XDECREF(bins);
+    free(arrays);
+    free(dims);
     return count_obj;
   }
 
@@ -484,6 +492,9 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     Py_XDECREF(range);
     Py_XDECREF(bins);
     Py_DECREF(count_obj);
+    free(arrays);
+    free(dims);
+    free(range_c);
     return NULL;
   }
   iternext = NpyIter_GetIterNext(iter, NULL);
@@ -496,6 +507,9 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     Py_XDECREF(range);
     Py_XDECREF(bins);
     Py_DECREF(count_obj);
+    free(arrays);
+    free(dims);
+    free(range_c);
     return NULL;
   }
   
@@ -531,7 +545,13 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
      Py_XDECREF(arrays[i]);
     }
     Py_DECREF(count_obj);
-    //Py_DECREF(count_array);
+    free(arrays);
+    free(dims);
+    free(range_c);
+    free(fndim);
+    free(norms);
+    free(dtypes);
+    free(op_flags);
     return NULL;
   }
 
@@ -547,7 +567,13 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
       Py_XDECREF(arrays[i]);
     }
     Py_DECREF(count_obj);
-    //Py_DECREF(count_array);
+    free(arrays);
+    free(dims);
+    free(range_c);
+    free(fndim);
+    free(norms);
+    free(dtypes);
+    free(op_flags);
     return NULL;
   }
 
@@ -621,6 +647,14 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   }
   Py_XDECREF(range);
   Py_XDECREF(bins);
+  free(arrays);
+  free(dims);
+  free(range_c);
+  free(fndim);
+  free(norms);
+  free(dtypes);
+  free(op_flags);
+  free(stride);
   return count_obj;
 }
 
@@ -996,6 +1030,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     }
     Py_XDECREF(range);
     Py_XDECREF(bins);
+    free(arrays);
     return NULL;
   }
   
@@ -1009,6 +1044,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
       }
       Py_XDECREF(range);
       Py_XDECREF(bins);
+      free(arrays);
       return NULL;
     }
   }
@@ -1023,6 +1059,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     }
     Py_XDECREF(range);
     Py_XDECREF(bins);
+    free(arrays);
     return NULL;
   }
   iternext = NpyIter_GetIterNext(iter, NULL);
@@ -1034,6 +1071,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     NpyIter_Deallocate(iter);
     Py_XDECREF(range);
     Py_XDECREF(bins);
+    free(arrays);
     return NULL;
   }
   dataptr = NpyIter_GetDataPtrArray(iter);
@@ -1055,6 +1093,8 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     Py_XDECREF(range);
     Py_XDECREF(bins);
     Py_XDECREF(count_obj);
+    free(arrays);
+    free(dims);
     return NULL;
   }
 
@@ -1068,6 +1108,8 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     }
     Py_XDECREF(range);
     Py_XDECREF(bins);
+    free(arrays);
+    free(dims);
     return count_obj;
   }
 
@@ -1084,6 +1126,9 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     Py_XDECREF(range);
     Py_XDECREF(bins);
     Py_DECREF(count_obj);
+    free(arrays);
+    free(dims);
+    free(range_c);
     return NULL;
   }
   iternext = NpyIter_GetIterNext(iter, NULL);
@@ -1096,6 +1141,9 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     Py_XDECREF(range);
     Py_XDECREF(bins);
     Py_DECREF(count_obj);
+    free(arrays);
+    free(dims);
+    free(range_c);
     return NULL;
   }
   
@@ -1131,7 +1179,13 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
      Py_XDECREF(arrays[i]);
     }
     Py_DECREF(count_obj);
-    //Py_DECREF(count_array);
+    free(arrays);
+    free(dims);
+    free(range_c);
+    free(fndim);
+    free(norms);
+    free(dtypes);
+    free(op_flags);
     return NULL;
   }
 
@@ -1147,7 +1201,13 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
       Py_XDECREF(arrays[i]);
     }
     Py_DECREF(count_obj);
-    //Py_DECREF(count_array);
+    free(arrays);
+    free(dims);
+    free(range_c);
+    free(fndim);
+    free(norms);
+    free(dtypes);
+    free(op_flags);
     return NULL;
   }
 
@@ -1224,5 +1284,13 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   }
   Py_XDECREF(range);
   Py_XDECREF(bins);
+  free(arrays);
+  free(dims);
+  free(range_c);
+  free(fndim);
+  free(norms);
+  free(dtypes);
+  free(op_flags);
+  free(stride);
   return count_obj;
 }
