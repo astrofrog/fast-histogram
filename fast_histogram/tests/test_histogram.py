@@ -4,6 +4,7 @@ import pytest
 
 from hypothesis import given, settings, assume
 from hypothesis import strategies as st
+from hypothesis import HealthCheck
 from hypothesis.extra.numpy import arrays
 
 from ..histogram import histogram1d, histogram2d, histogramdd
@@ -137,7 +138,7 @@ def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, 
        xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
-@settings(max_examples=500)
+@settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
 def test_dd_compare_with_numpy(values, hist_size, ndim, xmin, xmax, weights, dtype):
 
     if xmax <= xmin:
