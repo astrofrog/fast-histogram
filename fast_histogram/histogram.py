@@ -145,8 +145,31 @@ def histogramdd(sample, bins, range, weights=None):
     array : `~numpy.ndarray`
         The ND histogram array
     """
-
-    if weights is None:
-        return _histogramdd(sample, bins.astype(np.intp), range.astype(np.double))
+    
+    ndim = len(sample)
+    n = len(sample[0])
+    
+    if isinstance(bins, numbers.Integral):
+        _bins = bins * np.ones(ndim, dtype=np.intp)
     else:
-        return _histogramdd_weighted(sample, bins.astype(np.intp), range.astype(np.double), weights)
+        _bins = np.array(bins, dtype=np.intp)
+    if len(_bins) != ndim:
+        raise ValueError("number of bin counts does not match number of dimensions")
+    if np.any(_bins <= 0):
+        raise ValueError("all bin numbers should be strictly positive")
+    
+    _range = np.zeros((ndim, 2), dtype=np.double)
+    if not len(range) == ndim:
+        raise ValueError("number of ranges does not equal number of dimensions")
+    for i, r in enumerate(range):
+        if not len(r) == 2:
+            raise ValueError("should pass a minimum and maximum value for each dimension")
+        if r[0] >= r[1]:
+            raise ValueError("each range should be strictly increasing")
+        _range[i][0] = r[0]
+        _range[i][1] = r[1]
+    
+    if weights is None:
+        return _histogramdd(sample, _bins, _range)
+    else:
+        return _histogramdd_weighted(sample, _bins, _range, weights)
