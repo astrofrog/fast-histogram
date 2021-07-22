@@ -8,7 +8,8 @@ from ._histogram_core import (_histogram1d,
                               _histogram2d,
                               _histogramdd,
                               _histogram1d_weighted,
-                              _histogram2d_weighted)
+                              _histogram2d_weighted,
+                              _histogramdd_weighted)
 
 __all__ = ['histogram1d', 'histogram2d', 'histogramdd']
 
@@ -121,7 +122,7 @@ def histogram2d(x, y, bins, range, weights=None):
     else:
         return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax)
 
-def histogramdd(sample, bins, range):
+def histogramdd(sample, bins, range, weights=None):
     """
     Compute a histogram in arbitrarily high dimensions.
     
@@ -130,7 +131,22 @@ def histogramdd(sample, bins, range):
     sample : tuple of `~numpy.ndarray`
         The position of the points to bin in the histogram. Each array in the tuple
         contains the coordinates of one dimension.
-    
+    bins : int or iterable
+        The number of bins in each dimension. If given as an integer, the same
+        number of bins is used for each dimension.
+    range : iterable
+        The range to use in each dimention, as an iterable of value pairs, i.e.
+        [(xmin, xmax), (ymin, ymax)]
+    weights : `~numpy.ndarray`
+        The weights of the points in `sample`.
+
+    Returns
+    -------
+    array : `~numpy.ndarray`
+        The ND histogram array
     """
-    
-    return _histogramdd(sample, bins.astype(np.intp), range.astype(np.double))
+
+    if weights is None:
+        return _histogramdd(sample, bins.astype(np.intp), range.astype(np.double))
+    else:
+        return _histogramdd_weighted(sample, bins.astype(np.intp), range.astype(np.double), weights)
