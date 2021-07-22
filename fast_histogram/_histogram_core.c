@@ -348,7 +348,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   npy_intp *dims;
   double *count, *range_c, *fndim, *norms;
   double tx;
-  int idx, bin_idx, local_bin_idx, in_range, multiplier;
+  int bin_idx, local_bin_idx, in_range, *stride;
   // using xmin and xmax for all dimensions
   double xmin, xmax;
   NpyIter *iter;
@@ -541,42 +541,52 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
 
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
-
+  
+  /* Pre-compute index stride */
+  //  We comput the strides for the bin index for each dimension. The desired 
+  //  behavior is this:
+  //  1D: bin_idx = ix
+  //      --> stride = {1}
+  //  2D: bin_idx = ny * ix + iy
+  //      --> stride = {ny, 1}
+  //  3D: bin_idx = nz * ny * ix + nz * iy + iz
+  //      --> stride = {nz * ny, nz, 1}
+  //  ... and so on for higher dimensions.
+  //  Notice how the order of multiplication requires that we step through the 
+  //  dimensions backwards.
+  stride = (int *)malloc(sizeof(int) * ndim);
+  for (int i = 0; i < ndim; i++){
+    stride[i] = 1;
+  }
+  if (ndim > 1){
+    for (int i = ndim - 1; i > 0; i--){
+      stride[i - 1] = stride[i] * (int)dims[i];
+    }
+  }
+  
   Py_BEGIN_ALLOW_THREADS
 
   do {
     /* Get the inner loop data/stride/count values */
     npy_intp size = *innersizeptr;
-    int idim;
     /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
     while (size--) {
       bin_idx = 0;
       in_range = 1;
-      multiplier = 1;
-      for (idim = 0; idim < ndim; idim++){
-        idx = ndim - 1 - idim;  // reverse order of dimensions: z, y, x
-        xmin = range_c[idx * 2];
-        xmax = range_c[idx * 2 + 1];
-        tx = *(double *)dataptr[idx];  
+      for (int i = 0; i < ndim; i++){
+        xmin = range_c[i * 2];
+        xmax = range_c[i * 2 + 1];
+        tx = *(double *)dataptr[i];  
+        dataptr[i] += strideptr[i];
         if (tx < xmin || tx > xmax){
           in_range = 0;
+        } else {
+          local_bin_idx = (tx - xmin) * norms[i];
+          bin_idx += stride[i] * local_bin_idx;
         }
-        local_bin_idx = (tx - xmin) * norms[idx];
-        bin_idx += multiplier * local_bin_idx;
-        multiplier *= (int)dims[idx];
-        // This should lead to a bin index that behaves as follows:
-        //  1D: bin_idx = ix
-        //  2D: bin_idx = iy + ny * ix
-        //  3D: bin_idx = iz + nz * iy + nz * ny * ix
-        //  Notice how the order of multiplication requires that we step through the 
-        //  dimensions backwards.
       }
-      
       if (in_range){
         count[bin_idx] += 1;
-      }
-      for (idim = 0; idim < ndim; idim++){
-        dataptr[idim] += strideptr[idim];
       }
     }
 
