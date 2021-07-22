@@ -338,11 +338,10 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   return count_obj;
 }
 
-
 static PyObject *_histogramdd(PyObject *self, PyObject *args) {
 
   long n;
-  int ndim;
+  int ndim, sample_parsing_success;
   PyObject *sample_obj, *range_obj, *bins_obj,  *count_obj;
   PyArrayObject **arrays, *range, *bins, *count_array;
   npy_intp *dims;
@@ -369,18 +368,24 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * ndim);
+  sample_parsing_success = 1;
   for (int i = 0; i < ndim; i++){
     arrays[i] = (PyArrayObject *)PyArray_FROM_O(PyTuple_GetItem(sample_obj, i));
+    if (arrays[i] == NULL){
+      sample_parsing_success = 0;
+    }
   }
   
-  range = (PyArrayObject *)PyArray_FROM_O(range_obj);
+  dtype = PyArray_DescrFromType(NPY_DOUBLE);
+  range = (PyArrayObject *)PyArray_FromAny(range_obj, dtype, 2, 2, NPY_ARRAY_IN_ARRAY, NULL);
   dtype = PyArray_DescrFromType(NPY_INTP);
-  bins = (PyArrayObject *)PyArray_FROM_O(bins_obj);
-  //bins = (PyArrayObject *)PyArray_FromAny(bins_obj, dtype, 1, 1, NPY_ARRAY_IN_ARRAY, NULL);
+  bins = (PyArrayObject *)PyArray_FromAny(bins_obj, dtype, 1, 1, NPY_ARRAY_IN_ARRAY, NULL);
   
   /* If that didn't work, throw an `Exception`. */
-  if (range == NULL || bins == NULL) {
-    PyErr_SetString(PyExc_TypeError, "Couldn't parse the input arrays. Note that bins must be given as np.intp type.");
+  if (range == NULL || bins == NULL || !sample_parsing_success) {
+    PyErr_SetString(PyExc_TypeError, "Couldn't parse at least one of the input arrays."
+    " `range` must be passed as a 2D ndarray of type `np.double`,"
+    " `bins` must be passed as a 1D ndarray of type `np.intp`.");
     for (int i = 0; i < ndim; i++){
       Py_XDECREF(arrays[i]);
     }
@@ -391,6 +396,19 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   
   /* How many data points are there? */
   n = (long)PyArray_DIM(arrays[0], 0);
+  if (ndim > 1){
+    for (int i = 0; i < ndim; i++){
+      if (!((long)PyArray_DIM(arrays[i], 0) == n)){
+        PyErr_SetString(PyExc_RuntimeError, "Lengths of sample arrays do not match.");
+        for (int i = 0; i < ndim; i++){
+          Py_XDECREF(arrays[i]);
+        }
+        Py_XDECREF(range);
+        Py_XDECREF(bins);
+        return NULL;
+      }
+    }
+  }
   
   /* copy the content of `bins` into `dims` */
   dtype = PyArray_DescrFromType(NPY_INTP);
