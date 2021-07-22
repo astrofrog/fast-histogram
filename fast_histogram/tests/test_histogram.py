@@ -6,7 +6,7 @@ from hypothesis import given, settings, assume
 from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 
-from ..histogram import histogram1d, histogram2d
+from ..histogram import histogram1d, histogram2d, histogramdd
 
 # NOTE: for now we don't test the full range of floating-point values in the
 # tests below, because Numpy's behavior isn't always deterministic in some
@@ -70,7 +70,9 @@ def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
         rtol = 1e-14
 
     np.testing.assert_allclose(fast, reference, rtol=rtol)
-
+    
+    fastdd = histogramdd((x,), bins=nx, weights=w, range=[(xmin, xmax)])
+    np.testing.assert_array_equal(fast, fastdd)
 
 @given(values=arrays(dtype='<f8', shape=st.integers(0, 300),
                      elements=st.floats(-1000, 1000), unique=True),
@@ -124,6 +126,10 @@ def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, 
         rtol = 1e-14
 
     np.testing.assert_allclose(fast, reference, rtol=rtol)
+    
+    fastdd = histogramdd((x, y), bins=(nx, ny), weights=w,
+                         range=((xmin, xmax), (ymin, ymax)))
+    np.testing.assert_array_equal(fast, fastdd)
 
 
 def test_nd_arrays():
@@ -132,16 +138,21 @@ def test_nd_arrays():
 
     result_1d = histogram1d(x, bins=10, range=(0, 1))
     result_3d = histogram1d(x.reshape((10, 10, 10)), bins=10, range=(0, 1))
+    result_3d_dd = histogramdd((x.reshape((10, 10, 10)),), bins=10, range=((0, 1), ))
 
     np.testing.assert_equal(result_1d, result_3d)
+    np.testing.assert_equal(result_1d, result_3d_dd)
 
     y = np.random.random(1000)
 
     result_1d = histogram2d(x, y, bins=(10, 10), range=[(0, 1), (0, 1)])
     result_3d = histogram2d(x.reshape((10, 10, 10)), y.reshape((10, 10, 10)),
                             bins=(10, 10), range=[(0, 1), (0, 1)])
-
+    result_3d_dd = histogramdd((x.reshape((10, 10, 10)), y.reshape((10, 10, 10))),
+                               bins=(10, 10), range=[(0, 1), (0, 1)])
+    
     np.testing.assert_equal(result_1d, result_3d)
+    np.testing.assert_equal(result_1d, result_3d_dd)
 
 
 def test_list():
@@ -155,12 +166,18 @@ def test_list():
     result_arr = histogram1d(x_arr, bins=10, range=(0, 10))
 
     np.testing.assert_equal(result_list, result_arr)
+    
+    result_list_dd = histogramdd((x_list,), bins=10, range=((0, 10),))
+    result_arr_dd = histogramdd((x_arr,), bins=10, range=((0, 10),))
+
+    np.testing.assert_equal(result_list_dd, result_arr_dd)
 
 
 def test_non_contiguous():
 
     x = np.random.random((10, 10, 10))[::2, ::3, :]
     y = np.random.random((10, 10, 10))[::2, ::3, :]
+    z = np.random.random((10, 10, 10))[::2, ::3, :]
     w = np.random.random((10, 10, 10))[::2, ::3, :]
 
     assert not x.flags.c_contiguous
@@ -185,6 +202,19 @@ def test_non_contiguous():
     result_1 = histogram2d(x, y, bins=(10, 10), range=[(0, 1), (0, 1)], weights=w)
     result_2 = histogram2d(x.copy(), y.copy(), bins=(10, 10),
                            range=[(0, 1), (0, 1)], weights=w)
+
+    np.testing.assert_equal(result_1, result_2)
+    
+    result_1 = histogramdd((x, y, z), bins=(10, 10, 10), range=[(0, 1), (0, 1), (0, 1)])
+    result_2 = histogramdd((x.copy(), y.copy(), z.copy()), bins=(10, 10, 10),
+                           range=[(0, 1), (0, 1), (0, 1)])
+
+    np.testing.assert_equal(result_1, result_2)
+
+    result_1 = histogramdd((x, y, z), bins=(10, 10, 10), range=[(0, 1), (0, 1), (0, 1)],
+                           weights=w)
+    result_2 = histogramdd((x.copy(), y.copy(), z.copy()), bins=(10, 10, 10),
+                           range=[(0, 1), (0, 1), (0, 1)], weights=w)
 
     np.testing.assert_equal(result_1, result_2)
 
@@ -230,3 +260,11 @@ def test_mixed_strides():
     result_7 = histogram2d(x, y, weights=z, bins=(10, 10), range=[(0, 1), (0, 1)])
     result_8, _, _ = np.histogram2d(x.ravel(), y.ravel(), weights=z.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
     np.testing.assert_equal(result_7, result_8)
+    
+    result_9 = histogramdd((x, y), bins=(10, 10), range=[(0, 1), (0, 1)])
+    result_10, _, _ = np.histogram2d(x.ravel(), y.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
+    np.testing.assert_equal(result_9, result_10)
+
+    result_11 = histogramdd((x, y), weights=z, bins=(10, 10), range=[(0, 1), (0, 1)])
+    result_12, _, _ = np.histogram2d(x.ravel(), y.ravel(), weights=z.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
+    np.testing.assert_equal(result_11, result_12)
