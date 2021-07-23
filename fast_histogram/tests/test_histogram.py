@@ -139,7 +139,7 @@ def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, 
                      shape=(10,), unique=True),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
-@settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 def test_dd_compare_with_numpy(values, hist_size, bins, ranges, weights, dtype):
 
     # To avoid generating huge histograms that take a long time, we only take
