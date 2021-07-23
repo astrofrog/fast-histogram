@@ -2,7 +2,7 @@ import numpy as np
 
 import pytest
 
-from hypothesis import given, settings, assume
+from hypothesis import given, settings, assume, example
 from hypothesis import strategies as st
 from hypothesis import HealthCheck
 from hypothesis.extra.numpy import arrays
@@ -133,27 +133,33 @@ def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, 
 
 @given(values=arrays(dtype='<f8', shape=st.integers(0, 1000),
                      elements=st.floats(-1000, 1000), unique=True),
-       hist_size=st.integers(1, 1e4),
-       ndim=st.integers(1, 10),
-       xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
+       hist_size=st.integers(1, 1e5),
+       bins=arrays(elements=st.integers(1, 10), shape=(10,), dtype=np.int32),
+       ranges=arrays(elements=st.floats(1e-10, 1e5), dtype='<f8',
+                     shape=(10,), unique=True),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
 @settings(max_examples=500, suppress_health_check=[HealthCheck.too_slow])
-def test_dd_compare_with_numpy(values, hist_size, ndim, xmin, xmax, weights, dtype):
+def test_dd_compare_with_numpy(values, hist_size, bins, ranges, weights, dtype):
 
-    if xmax <= xmin:
-        return
-    
-    # We need to limit the number of bins in total so that we don't create examples that
-    # simply explode in size. In particular, np.histogramdd has a large intermediate
-    # memory requirement. That's why we sample a total hist size and a number of
-    # dimensions and calculate the bin size that would fit. The equation below yields
-    # the largest number of bins that creates a histogram that has at most the size
-    # hist_size.
-    bins = np.floor(np.exp(np.log(hist_size) / ndim)).astype(np.int32)
-    
+    # To avoid generating huge histograms that take a long time, we only take
+    # as many dimensions as we can such that the total hist_size is still within the
+    # limit. If `hist_size = 1`, we will take all the leading ones in `bins`.
+    _bins = []
+    accum_size = 1
+    for i in range(10):
+        if bins[i] * accum_size > hist_size:
+            break
+        _bins.append(bins[i]) 
+        accum_size *= bins[i]
+    ndim = len(_bins)
     values = values.astype(dtype)
-
+    ranges = ranges.astype(dtype)
+    ranges = ranges[:ndim]
+    # Ranges are symmetric because otherwise the probability of samples falling inside
+    # is just too small and we would just be testing a bunch of empty histograms.
+    ranges = np.vstack((-ranges, ranges)).T
+    
     size = len(values) // (ndim + 1)
 
     if weights:
@@ -163,9 +169,8 @@ def test_dd_compare_with_numpy(values, hist_size, ndim, xmin, xmax, weights, dty
     
     sample = tuple(values[size*(i+1):size*(i+2)] for i in range(ndim))
     # for simplicity using the same range in all dimensions
-    ranges = tuple((xmin, xmax) for i in range(ndim))
     try:
-        reference = np.histogramdd(sample, bins=bins, weights=w, range=ranges)[0]
+        reference = np.histogramdd(sample, bins=_bins, weights=w, range=ranges)[0]
     except Exception:
         # If Numpy fails, we skip the comparison since this isn't our fault
         return
@@ -173,17 +178,17 @@ def test_dd_compare_with_numpy(values, hist_size, ndim, xmin, xmax, weights, dty
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435.
     # FIXME: for now use < since that's what our algorithm does
-    inside = (sample[0] < xmax) & (sample[0] >= xmin)
+    inside = (sample[0] < ranges[0][1]) & (sample[0] >= ranges[0][0])
     if ndim > 1:
         for i in range(ndim - 1):
-            inside = inside & (sample[i+1] < xmax) & (sample[i+1] >= xmin)
+            inside = inside & (sample[i+1] < ranges[i+1][1]) & (sample[i+1] >= ranges[i+1][0])
     if weights:
         assume(np.allclose(np.sum(w[inside]), np.sum(reference)))
     else:
         n_inside = np.sum(inside)
         assume(n_inside == np.sum(reference))
 
-    fast = histogramdd(sample, bins=bins, weights=w, range=ranges)
+    fast = histogramdd(sample, bins=_bins, weights=w, range=ranges)
 
     if sample[0].dtype.kind == 'f' and sample[0].dtype.itemsize == 4:
         rtol = 1e-7
