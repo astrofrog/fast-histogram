@@ -1,7 +1,7 @@
 0.10 (unreleased)
 -----------------
 
-- No changes yet.
+- Add function for histograms in arbitrarily high dimensions.
 
 0.9 (2020-05-24)
 ----------------
