@@ -2,6 +2,7 @@
 -----------------
 
 - Add function for histograms in arbitrarily high dimensions.
+- Make behavior for data point at the uppermost bin edge consistent with numpy. [#10]
 
 0.9 (2020-05-24)
 ----------------
