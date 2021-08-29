@@ -287,40 +287,6 @@ def test_histogramdd_interface():
     result_fh = histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     np.testing.assert_equal(result_np, result_fh)
     
-def test_bin_edge_inclusivity():
-    # All bin intervals are closed on the left side and open on the right side, 
-    # but in numpy the last bin interval is closed on both sides.
-    # That means if we have
-    #     x = np.arange(11)
-    # Then numpy gives
-    #     np.histogram(x, bins=10, range=(0, 10))[0]
-    #     ---> array([1, 1, 1, 1, 1, 1, 1, 1, 1, 2])
-    # In 2D, values at the edges of all dimensions can be included:
-    #     X, Y = np.meshgrid(np.arange(4), np.arange(4))
-    #     np.histogram2d(X.ravel(), Y.ravel(), bins=(3,3), range=((0, 3), (0, 3)))
-    #     ---> (array([[1., 1., 2.],
-    #                  [1., 1., 2.],
-    #                  [2., 2., 4.]]),
-    #           array([0., 1., 2., 3.]),
-    #           array([0., 1., 2., 3.]))
-    
-    # testing 1D
-    x = np.arange(11)
-    result_np = np.histogram(x, bins=10, range=(0, 10))[0]
-    result_fh = histogram1d(x, bins=10, range=(0, 10))
-    result_dd = histogramdd((x,), bins=[10], range=[(0, 10)])
-    np.testing.assert_equal(result_np, result_fh)
-    np.testing.assert_equal(result_np, result_dd)
-
-    # testing 2D
-    X, Y = np.meshgrid(np.arange(4), np.arange(4))
-    result_np = np.histogram2d(X.ravel(), Y.ravel(),
-                               bins=(3, 3), range=((0, 3), (0, 3)))[0]
-    result_fh = histogram2d(X.ravel(), Y.ravel(), bins=(3, 3), range=((0, 3), (0, 3)))
-    result_dd = histogramdd((X.ravel(), Y.ravel()), bins=(3, 3), range=((0, 3), (0, 3)))
-    np.testing.assert_equal(result_np, result_fh)
-    np.testing.assert_equal(result_np, result_dd)
-
 def test_non_contiguous():
 
     x = np.random.random((10, 10, 10))[::2, ::3, :]
