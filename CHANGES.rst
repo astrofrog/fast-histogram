@@ -1,7 +1,7 @@
-0.10 (unreleased)
+0.10 (2021-09-06)
 -----------------
 
-- Add function for histograms in arbitrarily high dimensions.
+- Add function for histograms in arbitrarily high dimensions. [#54, #55]
 
 0.9 (2020-05-24)
 ----------------
