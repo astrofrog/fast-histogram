@@ -124,18 +124,25 @@ def histogram2d(x, y, bins, range, weights=None):
 
 def histogramdd(sample, bins, range, weights=None):
     """
-    Compute a histogram in arbitrarily high dimensions.
+    Compute a histogram of N samples in D dimensions.
     
     Parameters
     ----------
-    sample : tuple of `~numpy.ndarray`
-        The position of the points to bin in the histogram. Each array in the tuple
-        contains the coordinates of one dimension.
+    sample : (N, D) `~numpy.ndarray`, or (D, N) array_like
+        The data to be histogrammed.
+        * When an array_like, each element is the list of values for single
+          coordinate - such as ``histogramdd((X, Y, Z), bins, range)``.
+        * When a `~numpy.ndarray`, each row is a coordinate in a D-dimensional space -
+          such as ``histogramdd(np.array([p1, p2, p3]), bins, range)``.
+        * In the special case of D = 1, it is allowed to pass an array or array_like
+          with length N.
+        The second form is converted internally into the first form, thus the first form
+        is preferred.
     bins : int or iterable
         The number of bins in each dimension. If given as an integer, the same
-        number of bins is used for each dimension.
+        number of bins is used for every dimension.
     range : iterable
-        The range to use in each dimention, as an iterable of value pairs, i.e.
+        The range to use in each dimention, as an iterable of D value pairs, i.e.
         [(xmin, xmax), (ymin, ymax)]
     weights : `~numpy.ndarray`
         The weights of the points in `sample`.
@@ -146,8 +153,17 @@ def histogramdd(sample, bins, range, weights=None):
         The ND histogram array
     """
     
-    ndim = len(sample)
-    n = len(sample[0])
+    if isinstance(sample, np.ndarray):
+        _sample = tuple(np.atleast_2d(sample.T))
+    else:
+        # handle special case in 1D
+        if isinstance(sample[0], numbers.Real):
+            _sample = (sample,)
+        else:
+            _sample = tuple(sample)
+
+    ndim = len(_sample)
+    n = len(_sample[0])
     
     if isinstance(bins, numbers.Integral):
         _bins = bins * np.ones(ndim, dtype=np.intp)
@@ -159,6 +175,7 @@ def histogramdd(sample, bins, range, weights=None):
         raise ValueError("all bin numbers should be strictly positive")
     
     _range = np.zeros((ndim, 2), dtype=np.double)
+    
     if not len(range) == ndim:
         raise ValueError("number of ranges does not equal number of dimensions")
     for i, r in enumerate(range):
@@ -170,6 +187,6 @@ def histogramdd(sample, bins, range, weights=None):
         _range[i][1] = r[1]
     
     if weights is None:
-        return _histogramdd(sample, _bins, _range)
+        return _histogramdd(_sample, _bins, _range)
     else:
-        return _histogramdd_weighted(sample, _bins, _range, weights)
+        return _histogramdd_weighted(_sample, _bins, _range, weights)

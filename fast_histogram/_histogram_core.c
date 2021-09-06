@@ -625,7 +625,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
         xmax = range_c[i * 2 + 1];
         tx = *(double *)dataptr[i];  
         dataptr[i] += strideptr[i];
-        if (tx < xmin || tx > xmax){
+        if (tx < xmin || tx >= xmax){
           in_range = 0;
         } else {
           local_bin_idx = (tx - xmin) * norms[i];
@@ -1259,7 +1259,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
         xmax = range_c[i * 2 + 1];
         tx = *(double *)dataptr[i];  
         dataptr[i] += strideptr[i];
-        if (tx < xmin || tx > xmax){
+        if (tx < xmin || tx >= xmax){
           in_range = 0;
         } else {
           local_bin_idx = (tx - xmin) * norms[i];
