@@ -39,7 +39,7 @@ jobs:
         - windows: py310-test
 
   publish:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@main
     with:
       test_extras: test
       test_command: pytest --pyargs fast_histogram -m "not hypothesis"
