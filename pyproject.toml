@@ -4,3 +4,6 @@ requires = ["setuptools",
             "wheel",
             "oldest-supported-numpy"]
 build-backend = 'setuptools.build_meta'
+
+[tool.cibuildwheel]
+skip = "pp* *-musllinux*"
