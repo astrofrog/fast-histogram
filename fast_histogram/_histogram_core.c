@@ -1,4 +1,5 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define Py_LIMITED_API 0x030600f0
 
 #include <Python.h>
 #include <numpy/arrayobject.h>
@@ -366,9 +367,9 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     PyErr_SetString(PyExc_TypeError, "Error parsing input");
     return NULL;
   }
-  
-  ndim = (int)PyTuple_GET_SIZE(sample_obj);
-  
+
+  ndim = (int)PyTuple_Size(sample_obj);
+
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * ndim);
   sample_parsing_success = 1;
@@ -378,12 +379,12 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
       sample_parsing_success = 0;
     }
   }
-  
+
   dtype = PyArray_DescrFromType(NPY_DOUBLE);
   range = (PyArrayObject *)PyArray_FromAny(range_obj, dtype, 2, 2, NPY_ARRAY_IN_ARRAY, NULL);
   dtype = PyArray_DescrFromType(NPY_INTP);
   bins = (PyArrayObject *)PyArray_FromAny(bins_obj, dtype, 1, 1, NPY_ARRAY_IN_ARRAY, NULL);
-  
+
   /* If that didn't work, throw an `Exception`. */
   if (range == NULL || bins == NULL || !sample_parsing_success) {
     PyErr_SetString(PyExc_TypeError, "Couldn't parse at least one of the input arrays."
@@ -397,7 +398,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     free(arrays);
     return NULL;
   }
-  
+
   /* How many data points are there? */
   n = (long)PyArray_DIM(arrays[0], 0);
   if (ndim > 1){
@@ -414,7 +415,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
       }
     }
   }
-  
+
   /* copy the content of `bins` into `dims` */
   dtype = PyArray_DescrFromType(NPY_INTP);
   iter = NpyIter_New(bins, NPY_ITER_READONLY, NPY_CORDER, NPY_SAFE_CASTING, dtype);
@@ -448,7 +449,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     i++;
   } while (iternext(iter));
   NpyIter_Deallocate(iter);
-  
+
   /* build the output array */
   count_obj = PyArray_SimpleNew(ndim, dims, NPY_DOUBLE);
   if (count_obj == NULL) {
@@ -467,7 +468,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   count_array = (PyArrayObject *)count_obj;
 
   PyArray_FILLWBYTE(count_array, 0);
-  
+
   if (n == 0) {
     for (int i = 0; i < ndim; i++){
       Py_XDECREF(arrays[i]);
@@ -480,7 +481,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   }
 
   /* copy the content of the numpy array `ranges` into a simple C array */
-  // This just makes is easier to access the values later in the loop. 
+  // This just makes is easier to access the values later in the loop.
   range_c = (double *)malloc(sizeof(double) * ndim * 2);
   dtype = PyArray_DescrFromType(NPY_DOUBLE);
   iter = NpyIter_New(range, NPY_ITER_READONLY, NPY_CORDER, NPY_SAFE_CASTING, dtype);
@@ -512,7 +513,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     free(range_c);
     return NULL;
   }
-  
+
   dataptr = NpyIter_GetDataPtrArray(iter);
   i = 0;
   do{
@@ -520,7 +521,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     i++;
   } while (iternext(iter));
   NpyIter_Deallocate(iter);
-  
+
   /* now we pre-compute the bin normalizations for all dimensions */
   fndim = (double *)malloc(sizeof(double) * ndim);
   norms = (double *)malloc(sizeof(double) * ndim);
@@ -528,7 +529,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     fndim[j] = (double)dims[j];
     norms[j] = fndim[j] / (range_c[j * 2 + 1] - range_c[j * 2]);
   }
-  
+
   dtypes = (PyArray_Descr **)malloc(sizeof(PyArray_Descr *) * ndim);
   op_flags = (npy_uint32 *)malloc(sizeof(npy_uint32) * ndim);
   for (int i = 0; i < ndim; i++){
@@ -588,9 +589,9 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
 
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
-  
+
   /* Pre-compute index stride */
-  //  We comput the strides for the bin index for each dimension. The desired 
+  //  We comput the strides for the bin index for each dimension. The desired
   //  behavior is this:
   //  1D: bin_idx = ix
   //      --> stride = {1}
@@ -599,7 +600,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   //  3D: bin_idx = nz * ny * ix + nz * iy + iz
   //      --> stride = {nz * ny, nz, 1}
   //  ... and so on for higher dimensions.
-  //  Notice how the order of multiplication requires that we step through the 
+  //  Notice how the order of multiplication requires that we step through the
   //  dimensions backwards.
   stride = (int *)malloc(sizeof(int) * ndim);
   for (int i = 0; i < ndim; i++){
@@ -610,7 +611,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
       stride[i - 1] = stride[i] * (int)dims[i];
     }
   }
-  
+
   Py_BEGIN_ALLOW_THREADS
 
   do {
@@ -623,7 +624,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
       for (int i = 0; i < ndim; i++){
         xmin = range_c[i * 2];
         xmax = range_c[i * 2 + 1];
-        tx = *(double *)dataptr[i];  
+        tx = *(double *)dataptr[i];
         dataptr[i] += strideptr[i];
         if (tx < xmin || tx >= xmax){
           in_range = 0;
@@ -997,9 +998,9 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     PyErr_SetString(PyExc_TypeError, "Error parsing input");
     return NULL;
   }
-  
-  ndim = (int)PyTuple_GET_SIZE(sample_obj);
-  
+
+  ndim = (int)PyTuple_Size(sample_obj);
+
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * (ndim + 1));
   sample_parsing_success = 1;
@@ -1014,12 +1015,12 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   if (arrays[ndim] == NULL){
     sample_parsing_success = 0;
   }
-  
+
   dtype = PyArray_DescrFromType(NPY_DOUBLE);
   range = (PyArrayObject *)PyArray_FromAny(range_obj, dtype, 2, 2, NPY_ARRAY_IN_ARRAY, NULL);
   dtype = PyArray_DescrFromType(NPY_INTP);
   bins = (PyArrayObject *)PyArray_FromAny(bins_obj, dtype, 1, 1, NPY_ARRAY_IN_ARRAY, NULL);
-  
+
   /* If that didn't work, throw an `Exception`. */
   if (range == NULL || bins == NULL || !sample_parsing_success) {
     PyErr_SetString(PyExc_TypeError, "Couldn't parse at least one of the input arrays."
@@ -1033,7 +1034,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     free(arrays);
     return NULL;
   }
-  
+
   /* How many data points are there? */
   n = (long)PyArray_DIM(arrays[0], 0);
   for (int i = 0; i < ndim + 1; i++){
@@ -1048,7 +1049,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
       return NULL;
     }
   }
-  
+
   /* copy the content of `bins` into `dims` */
   dtype = PyArray_DescrFromType(NPY_INTP);
   iter = NpyIter_New(bins, NPY_ITER_READONLY, NPY_CORDER, NPY_SAFE_CASTING, dtype);
@@ -1082,7 +1083,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     i++;
   } while (iternext(iter));
   NpyIter_Deallocate(iter);
-  
+
   /* build the output array */
   count_obj = PyArray_SimpleNew(ndim, dims, NPY_DOUBLE);
   if (count_obj == NULL) {
@@ -1101,7 +1102,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   count_array = (PyArrayObject *)count_obj;
 
   PyArray_FILLWBYTE(count_array, 0);
-  
+
   if (n == 0) {
     for (int i = 0; i < ndim + 1; i++){
       Py_XDECREF(arrays[i]);
@@ -1114,7 +1115,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   }
 
   /* copy the content of the numpy array `ranges` into a simple C array */
-  // This just makes is easier to access the values later in the loop. 
+  // This just makes is easier to access the values later in the loop.
   range_c = (double *)malloc(sizeof(double) * ndim * 2);
   dtype = PyArray_DescrFromType(NPY_DOUBLE);
   iter = NpyIter_New(range, NPY_ITER_READONLY, NPY_CORDER, NPY_SAFE_CASTING, dtype);
@@ -1146,7 +1147,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     free(range_c);
     return NULL;
   }
-  
+
   dataptr = NpyIter_GetDataPtrArray(iter);
   i = 0;
   do{
@@ -1154,7 +1155,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     i++;
   } while (iternext(iter));
   NpyIter_Deallocate(iter);
-  
+
   /* now we pre-compute the bin normalizations for all dimensions */
   fndim = (double *)malloc(sizeof(double) * ndim);
   norms = (double *)malloc(sizeof(double) * ndim);
@@ -1162,7 +1163,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     fndim[j] = (double)dims[j];
     norms[j] = fndim[j] / (range_c[j * 2 + 1] - range_c[j * 2]);
   }
-  
+
   dtypes = (PyArray_Descr **)malloc(sizeof(PyArray_Descr *) * (ndim + 1));
   op_flags = (npy_uint32 *)malloc(sizeof(npy_uint32) * (ndim + 1));
   for (int i = 0; i < ndim + 1; i++){
@@ -1222,9 +1223,9 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
 
   /* Get C array for output array */
   count = (double *)PyArray_DATA(count_array);
-  
+
   /* Pre-compute index stride */
-  //  We comput the strides for the bin index for each dimension. The desired 
+  //  We comput the strides for the bin index for each dimension. The desired
   //  behavior is this:
   //  1D: bin_idx = ix
   //      --> stride = {1}
@@ -1233,7 +1234,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   //  3D: bin_idx = nz * ny * ix + nz * iy + iz
   //      --> stride = {nz * ny, nz, 1}
   //  ... and so on for higher dimensions.
-  //  Notice how the order of multiplication requires that we step through the 
+  //  Notice how the order of multiplication requires that we step through the
   //  dimensions backwards.
   stride = (int *)malloc(sizeof(int) * ndim);
   for (int i = 0; i < ndim; i++){
@@ -1244,7 +1245,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
       stride[i - 1] = stride[i] * (int)dims[i];
     }
   }
-  
+
   Py_BEGIN_ALLOW_THREADS
 
   do {
@@ -1257,7 +1258,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
       for (int i = 0; i < ndim; i++){
         xmin = range_c[i * 2];
         xmax = range_c[i * 2 + 1];
-        tx = *(double *)dataptr[i];  
+        tx = *(double *)dataptr[i];
         dataptr[i] += strideptr[i];
         if (tx < xmin || tx >= xmax){
           in_range = 0;
@@ -1271,7 +1272,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
       if (in_range){
         count[bin_idx] += tw;
       }
-      
+
     }
 
   } while (iternext(iter));
