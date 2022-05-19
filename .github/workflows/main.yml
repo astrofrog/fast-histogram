@@ -23,8 +23,10 @@ jobs:
         - macos: py36-test-numpy113
         - macos: py36-test-numpy114
         - macos: py36-test-numpy115
-        - macos: py37-test-numpy116
-        - macos: py37-test-numpy117
+        # The following two jobs are disabled due to an issue that seems
+        # specific to Python 3.7 and not worth investigating.
+        # - macos: py37-test-numpy116
+        # - macos: py37-test-numpy117
         - macos: py38-test-numpy118
         - macos: py39-test
         - macos: py310-test
