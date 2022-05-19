@@ -5,5 +5,10 @@ requires = ["setuptools",
             "oldest-supported-numpy"]
 build-backend = 'setuptools.build_meta'
 
-[tool.cibuildwheel]
-skip = "pp* *-musllinux*"
+[tool.cibuildwheel.linux.environment]
+CC = "gcc"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+before-all = "apk add clang"
+environment = { CC="clang" }

@@ -45,5 +45,6 @@ jobs:
     with:
       test_extras: test
       test_command: pytest --pyargs fast_histogram -m "not hypothesis"
+      sdist-runs-on: ubuntu-22.04
     secrets:
       pypi_token: ${{ secrets.PYPI_TOKEN }}
