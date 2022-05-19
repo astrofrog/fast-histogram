@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  tests:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      coverage: codecov
+      envs: |
+        - linux: py36-test-numpy113
+        - linux: py36-test-numpy114
+        - linux: py36-test-numpy115
+        - linux: py37-test-numpy116
+        - linux: py37-test-numpy117
+        - linux: py38-test-numpy118
+
+        - macos: py36-test-numpy113
+        - macos: py36-test-numpy114
+        - macos: py36-test-numpy115
+        - macos: py37-test-numpy116
+        - macos: py37-test-numpy117
+        - macos: py38-test-numpy118
+
+        - windows: py36-test-numpy113
+        - windows: py36-test-numpy114
+        - windows: py36-test-numpy115
+        - windows: py37-test-numpy116
+        - windows: py37-test-numpy117
+        - windows: py38-test-numpy118
+
+  publish:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
+    with:
+      test_extras: test
+      test_command: pytest --pyargs fast_histogram -m "not hypothesis"
+    secrets:
+      pypi_token: ${{ secrets.PYPI_TOKEN }}
