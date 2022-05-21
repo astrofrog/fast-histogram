@@ -7,6 +7,7 @@ build-backend = 'setuptools.build_meta'
 
 [tool.cibuildwheel.linux]
 skip = "*-musllinux_i686"
+archs = ["auto", "aarch64"]
 
 [tool.cibuildwheel.macos]
 skip = "pp*"
