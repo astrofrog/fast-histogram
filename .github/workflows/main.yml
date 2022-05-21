@@ -10,6 +10,8 @@ jobs:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@main
     with:
       coverage: codecov
+      runs-on: |
+        linux: ubuntu-22.04
       envs: |
         - linux: py36-test-numpy113
         - linux: py36-test-numpy114
