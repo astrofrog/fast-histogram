@@ -10,6 +10,7 @@ skip = "*-musllinux_i686"
 
 [tool.cibuildwheel.macos]
 skip = "pp*"
+archs = ["x86_64", "arm64"]
 
 [tool.cibuildwheel.windows]
 skip = "pp*"
