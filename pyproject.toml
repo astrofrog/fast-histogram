@@ -5,6 +5,9 @@ requires = ["setuptools",
             "oldest-supported-numpy"]
 build-backend = 'setuptools.build_meta'
 
+[tool.cibuildwheel.linux]
+skip = "*-musllinux_i686"
+
 [tool.cibuildwheel.macos]
 skip = "pp*"
 
