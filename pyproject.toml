@@ -5,6 +5,12 @@ requires = ["setuptools",
             "oldest-supported-numpy"]
 build-backend = 'setuptools.build_meta'
 
+[tool.cibuildwheel.macos]
+skip = "pp*"
+
+[tool.cibuildwheel.windows]
+skip = "pp*"
+
 [tool.cibuildwheel.linux.environment]
 CC = "gcc"
 
