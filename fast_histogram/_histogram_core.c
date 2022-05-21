@@ -1,12 +1,6 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define Py_LIMITED_API 0x030600f0
 
-// The following struct definition is to avoid a GCC bug - see
-// https://github.com/numpy/numpy/issues/16970 for more details.
-struct _typeobject {
-  int foo;
-};
-
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #include <numpy/npy_math.h>

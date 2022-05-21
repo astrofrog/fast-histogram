@@ -10,10 +10,9 @@ jobs:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@main
     with:
       coverage: codecov
+      runs-on: |
+        linux: ubuntu-22.04
       envs: |
-        - linux: py36-test-numpy113
-        - linux: py36-test-numpy114
-        - linux: py36-test-numpy115
         - linux: py37-test-numpy116
         - linux: py37-test-numpy117
         - linux: py38-test-numpy118
@@ -45,5 +44,12 @@ jobs:
     with:
       test_extras: test
       test_command: pytest --pyargs fast_histogram -m "not hypothesis"
+      sdist-runs-on: ubuntu-22.04
+      targets: |
+        - cp*manylinux*
+        - cp*musllinux*
+        - pp*
+        - macos
+        - windows
     secrets:
       pypi_token: ${{ secrets.PYPI_TOKEN }}
