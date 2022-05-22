@@ -46,9 +46,15 @@ jobs:
       test_command: pytest --pyargs fast_histogram -m "not hypothesis"
       sdist-runs-on: ubuntu-22.04
       targets: |
-        - cp*manylinux*
-        - cp*musllinux*
-        - pp*
+        - cp*-manylinux_i686
+        - cp*-manylinux_x86_64
+        - cp*-manylinux_aarch64
+        # - cp*-musllinux_i686
+        - cp*-musllinux_x86_64
+        # - cp*-musllinux_aarch64
+        - pp*-manylinux_i686
+        - pp*-manylinux_x86_64
+        # - pp*-manylinux_aarch64
         - cp*-macosx_x86_64
         - cp*-macosx_arm64
         - windows
