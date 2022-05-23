@@ -1,3 +1,8 @@
+0.11 (2022-05-23)
+-----------------
+
+- Use Python limited API to produce forward-compatible wheels. [#56]
+
 0.10 (2021-09-06)
 -----------------
 
