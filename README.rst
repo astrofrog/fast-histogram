@@ -1,4 +1,4 @@
-|Azure Status| |asv|
+|CI Status| |asv|
 
 About
 -----
@@ -153,8 +153,8 @@ Can I contribute?
 Yes please! This is not meant to be a finished package, and I welcome
 pull request to improve things.
 
-.. |Azure Status| image:: https://dev.azure.com/thomasrobitaille/fast-histogram/_apis/build/status/astrofrog.fast-histogram?branchName=master
-   :target: https://dev.azure.com/thomasrobitaille/fast-histogram/_build/latest?definitionId=13&branchName=master
+.. |CI Status| image:: https://github.com/astrofrog/fast-histogram/actions/workflows/main.yml/badge.svg
+   :target: https://github.com/astrofrog/fast-histogram/actions/workflows/main.yml
 
 .. |asv| image:: https://img.shields.io/badge/benchmarked%20by-asv-brightgreen.svg
    :target: https://astrofrog.github.io/fast-histogram
