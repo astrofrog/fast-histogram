@@ -171,6 +171,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
 
       if (tx >= xmin && tx < xmax) {
         ix = (tx - xmin) * normx;
+        if(ix == nx) ix -= 1;
         count[ix] += 1.;
       }
 
@@ -322,6 +323,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
       if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
         ix = (tx - xmin) * normx;
         iy = (ty - ymin) * normy;
+        if(ix == nx) ix -= 1;
+        if(iy == ny) iy -= 1;
         count[iy + ny * ix] += 1.;
       }
 
@@ -630,11 +633,12 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
           in_range = 0;
         } else {
           local_bin_idx = (tx - xmin) * norms[i];
+          if(local_bin_idx == dims[i]) local_bin_idx -= 1;
           bin_idx += stride[i] * local_bin_idx;
         }
       }
       if (in_range){
-        count[bin_idx] += 1;
+count[bin_idx] += 1;
       }
     }
 
@@ -788,6 +792,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
 
       if (tx >= xmin && tx < xmax) {
         ix = (tx - xmin) * normx;
+        if(ix == nx) ix -= 1;
         count[ix] += tw;
       }
 
@@ -951,6 +956,8 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
       if (tx >= xmin && tx < xmax && ty >= ymin && ty < ymax) {
         ix = (tx - xmin) * normx;
         iy = (ty - ymin) * normy;
+        if(ix == nx) ix -= 1;
+        if(iy == ny) iy -= 11;
         count[iy + ny * ix] += tw;
       }
 
@@ -1264,6 +1271,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
           in_range = 0;
         } else {
           local_bin_idx = (tx - xmin) * norms[i];
+          if(local_bin_idx == dims[i]) local_bin_idx= -= 1;
           bin_idx += stride[i] * local_bin_idx;
         }
       }
