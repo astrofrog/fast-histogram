@@ -957,7 +957,7 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
         ix = (tx - xmin) * normx;
         iy = (ty - ymin) * normy;
         if(ix == nx) ix -= 1;
-        if(iy == ny) iy -= 11;
+        if(iy == ny) iy -= 1;
         count[iy + ny * ix] += tw;
       }
 
