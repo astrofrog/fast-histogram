@@ -24,6 +24,11 @@ from ..histogram import histogram1d, histogram2d, histogramdd
 @settings(max_examples=500)
 def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
 
+    # Numpy will automatically cast the bounds to the dtype so we should do this
+    # here to get consistent results
+    xmin = float(np.array(xmin, dtype=dtype))
+    xmax = float(np.array(xmax, dtype=dtype))
+
     if xmax <= xmin:
         return
 
@@ -84,6 +89,13 @@ def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
 @settings(max_examples=500)
 def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, dtype):
+
+    # Numpy will automatically cast the bounds to the dtype so we should do this
+    # here to get consistent results
+    xmin = float(np.array(xmin, dtype=dtype))
+    xmax = float(np.array(xmax, dtype=dtype))
+    ymin = float(np.array(ymin, dtype=dtype))
+    ymax = float(np.array(ymax, dtype=dtype))
 
     if xmax <= xmin or ymax <= ymin:
         return
@@ -159,6 +171,10 @@ def test_dd_compare_with_numpy(values, hist_size, bins, ranges, weights, dtype):
     # Ranges are symmetric because otherwise the probability of samples falling inside
     # is just too small and we would just be testing a bunch of empty histograms.
     ranges = np.vstack((-ranges, ranges)).T
+
+    # Numpy will automatically cast the bounds to the dtype so we should do this
+    # here to get consistent results
+    ranges = ranges.astype(dtype)
 
     size = len(values) // (ndim + 1)
 
