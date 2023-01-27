@@ -1271,7 +1271,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
           in_range = 0;
         } else {
           local_bin_idx = (tx - xmin) * norms[i];
-          if(local_bin_idx == dims[i]) local_bin_idx= -= 1;
+          if(local_bin_idx == dims[i]) local_bin_idx -= 1;
           bin_idx += stride[i] * local_bin_idx;
         }
       }
