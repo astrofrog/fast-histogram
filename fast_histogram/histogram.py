@@ -11,6 +11,8 @@ from ._histogram_core import (_histogram1d,
                               _histogram2d_weighted,
                               _histogramdd_weighted)
 
+NUMERICAL_TYPES = {'f', 'i', 'u'}
+
 __all__ = ['histogram1d', 'histogram2d', 'histogramdd']
 
 
@@ -54,9 +56,17 @@ def histogram1d(x, bins, range, weights=None):
     if nx <= 0:
         raise ValueError("nx should be strictly positive")
 
+    x = np.atleast_1d(x)
+
+    if x.dtype.kind not in NUMERICAL_TYPES:
+        raise TypeError("x is not or cannot be converted to a numerical array")
+
     if weights is None:
         return _histogram1d(x, nx, xmin, xmax)
     else:
+        weights = np.atleast_1d(weights)
+        if weights.dtype.kind not in NUMERICAL_TYPES:
+            raise TypeError("weights is not or cannot be converted to a numerical array")
         return _histogram1d_weighted(x, weights, nx, xmin, xmax)
 
 
@@ -117,15 +127,28 @@ def histogram2d(x, y, bins, range, weights=None):
     if ny <= 0:
         raise ValueError("ny should be strictly positive")
 
+    x = np.atleast_1d(x)
+    y = np.atleast_1d(y)
+
+    if x.dtype.kind not in NUMERICAL_TYPES:
+        raise TypeError("x is not or cannot be converted to a numerical array")
+
+    if y.dtype.kind not in NUMERICAL_TYPES:
+        raise TypeError("y is not or cannot be converted to a numerical array")
+
     if weights is None:
         return _histogram2d(x, y, nx, xmin, xmax, ny, ymin, ymax)
     else:
+        weights = np.atleast_1d(weights)
+        if weights.dtype.kind not in NUMERICAL_TYPES:
+            raise TypeError("weights is not or cannot be converted to a numerical array")
         return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax)
+
 
 def histogramdd(sample, bins, range, weights=None):
     """
     Compute a histogram of N samples in D dimensions.
-    
+
     Parameters
     ----------
     sample : (N, D) `~numpy.ndarray`, or (D, N) array_like
@@ -152,19 +175,22 @@ def histogramdd(sample, bins, range, weights=None):
     array : `~numpy.ndarray`
         The ND histogram array
     """
-    
+
     if isinstance(sample, np.ndarray):
         _sample = tuple(np.atleast_2d(sample.T))
     else:
         # handle special case in 1D
         if isinstance(sample[0], numbers.Real):
-            _sample = (sample,)
+            _sample = (np.atleast_1d(sample),)
         else:
-            _sample = tuple(sample)
+            _sample = tuple([np.atleast_1d(x) for x in sample])
+
+    for x in _sample:
+        if x.dtype.kind not in NUMERICAL_TYPES:
+            raise TypeError("input is not or cannot be converted to a numerical array")
 
     ndim = len(_sample)
-    n = len(_sample[0])
-    
+
     if isinstance(bins, numbers.Integral):
         _bins = bins * np.ones(ndim, dtype=np.intp)
     else:
@@ -173,9 +199,9 @@ def histogramdd(sample, bins, range, weights=None):
         raise ValueError("number of bin counts does not match number of dimensions")
     if np.any(_bins <= 0):
         raise ValueError("all bin numbers should be strictly positive")
-    
+
     _range = np.zeros((ndim, 2), dtype=np.double)
-    
+
     if not len(range) == ndim:
         raise ValueError("number of ranges does not equal number of dimensions")
     for i, r in enumerate(range):
@@ -185,8 +211,11 @@ def histogramdd(sample, bins, range, weights=None):
             raise ValueError("each range should be strictly increasing")
         _range[i][0] = r[0]
         _range[i][1] = r[1]
-    
+
     if weights is None:
         return _histogramdd(_sample, _bins, _range)
     else:
+        weights = np.atleast_1d(weights)
+        if weights.dtype.kind not in NUMERICAL_TYPES:
+            raise TypeError("weights is not or cannot be converted to a numerical array")
         return _histogramdd_weighted(_sample, _bins, _range, weights)

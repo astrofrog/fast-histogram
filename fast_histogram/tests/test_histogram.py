@@ -70,7 +70,7 @@ def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
         rtol = 1e-14
 
     np.testing.assert_allclose(fast, reference, rtol=rtol)
-    
+
     fastdd = histogramdd((x,), bins=nx, weights=w, range=[(xmin, xmax)])
     np.testing.assert_array_equal(fast, fastdd)
 
@@ -126,7 +126,7 @@ def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, 
         rtol = 1e-14
 
     np.testing.assert_allclose(fast, reference, rtol=rtol)
-    
+
     fastdd = histogramdd((x, y), bins=(nx, ny), weights=w,
                          range=((xmin, xmax), (ymin, ymax)))
     np.testing.assert_array_equal(fast, fastdd)
@@ -150,7 +150,7 @@ def test_dd_compare_with_numpy(values, hist_size, bins, ranges, weights, dtype):
     for i in range(10):
         if bins[i] * accum_size > hist_size:
             break
-        _bins.append(bins[i]) 
+        _bins.append(bins[i])
         accum_size *= bins[i]
     ndim = len(_bins)
     values = values.astype(dtype)
@@ -159,14 +159,14 @@ def test_dd_compare_with_numpy(values, hist_size, bins, ranges, weights, dtype):
     # Ranges are symmetric because otherwise the probability of samples falling inside
     # is just too small and we would just be testing a bunch of empty histograms.
     ranges = np.vstack((-ranges, ranges)).T
-    
+
     size = len(values) // (ndim + 1)
 
     if weights:
         w = values[:size]
     else:
         w = None
-    
+
     sample = tuple(values[size*(i+1):size*(i+2)] for i in range(ndim))
     # for simplicity using the same range in all dimensions
     try:
@@ -215,7 +215,7 @@ def test_nd_arrays():
                             bins=(10, 10), range=[(0, 1), (0, 1)])
     result_3d_dd = histogramdd((x.reshape((10, 10, 10)), y.reshape((10, 10, 10))),
                                bins=(10, 10), range=[(0, 1), (0, 1)])
-    
+
     np.testing.assert_equal(result_1d, result_3d)
     np.testing.assert_equal(result_1d, result_3d_dd)
 
@@ -227,15 +227,32 @@ def test_list():
     x_list = [1.4, 2.1, 4.2]
     x_arr = np.array(x_list)
 
-    result_list = histogram1d(x_list, bins=10, range=(0, 10))
-    result_arr = histogram1d(x_arr, bins=10, range=(0, 10))
+    y_list = [2.4, 1.1, 3.2]
+    y_arr = np.array(y_list)
 
-    np.testing.assert_equal(result_list, result_arr)
-    
-    result_list_dd = histogramdd(x_list, bins=10, range=((0, 10),))
-    result_arr_dd = histogramdd(x_arr, bins=10, range=((0, 10),))
+    z_list = [3.4, 3.1, 2.2]
+    z_arr = np.array(z_list)
 
-    np.testing.assert_equal(result_list_dd, result_arr_dd)
+    result_list_1d = histogram1d(x_list, bins=10, range=(0, 10))
+    result_arr_1d = histogram1d(x_arr, bins=10, range=(0, 10))
+
+    np.testing.assert_equal(result_list_1d, result_arr_1d)
+
+    result_list_2d = histogram2d(x_list, y_list, bins=10, range=[(0, 10), (0, 10)])
+    result_arr_2d = histogram2d(x_arr, y_arr, bins=10, range=[(0, 10), (0, 10)])
+
+    np.testing.assert_equal(result_list_2d, result_arr_2d)
+
+    result_list_dd1 = histogramdd(x_list, bins=10, range=((0, 10),))
+    result_arr_dd1 = histogramdd(x_arr, bins=10, range=((0, 10),))
+
+    np.testing.assert_equal(result_list_dd1, result_arr_dd1)
+
+    result_list_dd2 = histogramdd((x_list, y_list, z_list), bins=10, range=((0, 10),(0, 10), (0, 10)))
+    result_arr_dd2 = histogramdd((x_arr, y_arr, z_arr), bins=10, range=((0, 10),(0, 10),(0, 10)))
+
+    np.testing.assert_equal(result_list_dd2, result_arr_dd2)
+
 
 def test_histogramdd_interface():
     # make sure the interface of histogramdd works as numpy.histogramdd
@@ -243,50 +260,50 @@ def test_histogramdd_interface():
     x_arr = np.array(x_list)
     y_list = [6.6, 3.2, 2.9, 3.9, 0.1]
     y_arr = np.array(y_list)
-    
+
     # test 1D (needs special handling in case the sample is a list)
     sample = x_arr
     result_np, _ = np.histogramdd(sample, bins=10, range=((0, 10),))
     result_fh = histogramdd(sample, bins=10, range=((0, 10),))
     np.testing.assert_equal(result_np, result_fh)
-    
+
     sample = x_list
     result_np, _ = np.histogramdd(sample, bins=10, range=((0, 10),))
     result_fh = histogramdd(sample, bins=10, range=((0, 10),))
     np.testing.assert_equal(result_np, result_fh)
-    
+
     # test (D, N) array_like
     sample = (x_arr, y_arr)
     result_np, _ = np.histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     result_fh = histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     np.testing.assert_equal(result_np, result_fh)
-    
+
     sample = [x_arr, y_arr]
     result_np, _ = np.histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     result_fh = histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     np.testing.assert_equal(result_np, result_fh)
-    
+
     sample = (x_list, y_list)
     result_np, _ = np.histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     result_fh = histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     np.testing.assert_equal(result_np, result_fh)
-    
+
     sample = [x_list, y_list]
     result_np, _ = np.histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     result_fh = histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     np.testing.assert_equal(result_np, result_fh)
-    
+
     # test (N, D) array
     sample = np.vstack([x_arr, y_arr]).T
     result_np, _ = np.histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     result_fh = histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     np.testing.assert_equal(result_np, result_fh)
-    
+
     sample = np.vstack([x_list, y_list]).T
     result_np, _ = np.histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     result_fh = histogramdd(sample, bins=10, range=((0, 10), (0, 10)))
     np.testing.assert_equal(result_np, result_fh)
-    
+
 def test_non_contiguous():
 
     x = np.random.random((10, 10, 10))[::2, ::3, :]
@@ -318,7 +335,7 @@ def test_non_contiguous():
                            range=[(0, 1), (0, 1)], weights=w)
 
     np.testing.assert_equal(result_1, result_2)
-    
+
     result_1 = histogramdd((x, y, z), bins=(10, 10, 10), range=[(0, 1), (0, 1), (0, 1)])
     result_2 = histogramdd((x.copy(), y.copy(), z.copy()), bins=(10, 10, 10),
                            range=[(0, 1), (0, 1), (0, 1)])
@@ -374,7 +391,7 @@ def test_mixed_strides():
     result_7 = histogram2d(x, y, weights=z, bins=(10, 10), range=[(0, 1), (0, 1)])
     result_8, _, _ = np.histogram2d(x.ravel(), y.ravel(), weights=z.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
     np.testing.assert_equal(result_7, result_8)
-    
+
     result_9 = histogramdd((x, y), bins=(10, 10), range=[(0, 1), (0, 1)])
     result_10, _, _ = np.histogram2d(x.ravel(), y.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
     np.testing.assert_equal(result_9, result_10)
@@ -382,3 +399,79 @@ def test_mixed_strides():
     result_11 = histogramdd((x, y), weights=z, bins=(10, 10), range=[(0, 1), (0, 1)])
     result_12, _, _ = np.histogram2d(x.ravel(), y.ravel(), weights=z.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
     np.testing.assert_equal(result_11, result_12)
+
+
+def test_scalar_arrays():
+
+    # Regression test for a bug that caused a segmentation fault to occur
+    # when passing in 0-d scalar arrays.
+
+    x0 = np.array(1.5)
+    y0 = np.array(2.5)
+    z0 = np.array(3.5)
+
+    x1 = np.array([1.5])
+    y1 = np.array([2.5])
+    z1 = np.array([3.5])
+
+    for weights in (False, True):
+
+        if weights:
+            w0 = np.array(1.0)
+            w1 = np.array([1.0])
+        else:
+            w0 = None
+            w1 = None
+
+        expected_1d = histogram1d(x1, weights=w0, bins=10, range=(0, 10))
+        expected_2d = histogram2d(x1, y1, weights=w0, bins=10, range=[(0, 10), (0, 10)])
+        expected_dd = histogramdd((x1, y1, z1), weights=w0, bins=10, range=[(0, 10), (0, 10), (0, 10)])
+
+        actual_1d = histogram1d(x0, weights=w1, bins=10, range=(0, 10))
+        actual_2d = histogram2d(x0, y0, weights=w1, bins=10, range=[(0, 10), (0, 10)])
+        actual_dd = histogramdd((x0, y0, z0), weights=w1, bins=10, range=[(0, 10), (0, 10), (0, 10)])
+
+        np.testing.assert_equal(actual_1d, expected_1d)
+        np.testing.assert_equal(actual_2d, expected_2d)
+        np.testing.assert_equal(actual_dd, expected_dd)
+
+
+def test_invalid_list():
+
+    # Make sure that we don't segfault is lists that don't convert to numerical
+    # arrays are used.
+
+    x_list = [1.4, 2.1, 3.2]
+    y_list = [2.4, 1.1, 3.3]
+    z_list = [3.4, 3.1, 2.2]
+    invalid_list = [2.3, 1.2, 'a']
+
+    with pytest.raises(TypeError, match='x is not or cannot be converted'):
+        histogram1d(invalid_list, bins=10, range=(0, 10))
+
+    with pytest.raises(TypeError, match='weights is not or cannot be converted'):
+        histogram1d(x_list, weights=invalid_list, bins=10, range=(0, 10))
+
+    with pytest.raises(TypeError, match='x is not or cannot be converted'):
+        histogram2d(invalid_list, y_list, bins=10, range=[(0, 10), (0, 10)])
+
+    with pytest.raises(TypeError, match='y is not or cannot be converted'):
+        histogram2d(x_list, invalid_list, bins=10, range=[(0, 10), (0, 10)])
+
+    with pytest.raises(TypeError, match='weights is not or cannot be converted'):
+        histogram2d(x_list, y_list, weights=invalid_list, bins=10, range=[(0, 10), (0, 10)])
+
+    with pytest.raises(TypeError, match='input is not or cannot be converted'):
+        histogramdd(invalid_list, bins=10, range=((0, 10),))
+
+    with pytest.raises(TypeError, match='input is not or cannot be converted'):
+        histogramdd((invalid_list, y_list, z_list), bins=10, range=((0, 10), (0, 10), (0, 10)))
+
+    with pytest.raises(TypeError, match='input is not or cannot be converted'):
+        histogramdd((x_list, invalid_list, z_list), bins=10, range=((0, 10), (0, 10), (0, 10)))
+
+    with pytest.raises(TypeError, match='input is not or cannot be converted'):
+        histogramdd((x_list, y_list, invalid_list), bins=10, range=((0, 10), (0, 10), (0, 10)))
+
+    with pytest.raises(TypeError, match='weights is not or cannot be converted'):
+        histogramdd((x_list, y_list, z_list), weights=invalid_list, bins=10, range=((0, 10), (0, 10), (0, 10)))

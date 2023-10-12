@@ -63,3 +63,5 @@ htmlcov
 .tox
 .tmp
 fast_histogram/version.py
+
+.hypothesis
