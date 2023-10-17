@@ -9,44 +9,46 @@ from hypothesis.extra.numpy import arrays
 
 from ..histogram import histogram1d, histogram2d, histogramdd
 
-# NOTE: for now we don't test the full range of floating-point values in the
-# tests below, because Numpy's behavior isn't always deterministic in some
-# of the extreme regimes. We should add manual (non-hypothesis and not
-# comparing to Numpy) test cases.
 
-@given(values=arrays(dtype='<f8', shape=st.integers(0, 200),
-                     elements=st.floats(-1000, 1000), unique=True),
+# NOTE: For now we randomly generate values ourselves when comparing to Numpy -
+# ideally we would make use of hypothesis to do this but when we do this we run
+# into issues with the numpy implementation too. We have a separate test to
+# make sure our implementation works with arbitrary hypothesis-generated
+# arrays.
+
+
+
+@given(size=st.integers(0, 50),
        nx=st.integers(1, 10),
        xmin=st.floats(-1e10, 1e10),
        xmax=st.floats(-1e10, 1e10),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
-@settings(max_examples=500)
-def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
+@settings(max_examples=1000)
+def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
+
+    # For now we randomly generate values ourselves - ideally we would make use
+    # of hypothesis to do this but when we do this we run into issues with the
+    # numpy implementation too. We have a separate test to make sure our
+    # implementation works with arbitrary hypothesis-generated arrays.
+    values = np.random.uniform(-1000, 1000, size * 2).astype(dtype)
+
+    # Numpy will automatically cast the bounds to the dtype so we should do this
+    # here to get consistent results
+    xmin = float(np.array(xmin, dtype=dtype))
+    xmax = float(np.array(xmax, dtype=dtype))
 
     if xmax <= xmin:
-        return
-
-    values = values.astype(dtype)
-
-    size = len(values) // 2
+        assume(False)
 
     if weights:
         w = values[:size]
     else:
         w = None
 
-    x = values[size:size * 2]
+    x = values[size:]
 
-    try:
-        reference = np.histogram(x, bins=nx, weights=w, range=(xmin, xmax))[0]
-    except ValueError:
-        if 'f4' in str(x.dtype):
-            # Numpy has a bug in certain corner cases
-            # https://github.com/numpy/numpy/issues/11586
-            return
-        else:
-            raise
+    reference = np.histogram(x, bins=nx, weights=w, range=(xmin, xmax))[0]
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435
@@ -74,23 +76,31 @@ def test_1d_compare_with_numpy(values, nx, xmin, xmax, weights, dtype):
     fastdd = histogramdd((x,), bins=nx, weights=w, range=[(xmin, xmax)])
     np.testing.assert_array_equal(fast, fastdd)
 
-@given(values=arrays(dtype='<f8', shape=st.integers(0, 300),
-                     elements=st.floats(-1000, 1000), unique=True),
+@given(size=st.integers(0, 50),
        nx=st.integers(1, 10),
        xmin=st.floats(-1e10, 1e10), xmax=st.floats(-1e10, 1e10),
        ny=st.integers(1, 10),
        ymin=st.floats(-1e10, 1e10), ymax=st.floats(-1e10, 1e10),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
-@settings(max_examples=500)
-def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, dtype):
+@settings(max_examples=1000)
+def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights, dtype):
+
+    # For now we randomly generate values ourselves - ideally we would make use
+    # of hypothesis to do this but when we do this we run into issues with the
+    # numpy implementation too. We have a separate test to make sure our
+    # implementation works with arbitrary hypothesis-generated arrays.
+    values = np.random.uniform(-1000, 1000, size * 3).astype(dtype)
+
+    # Numpy will automatically cast the bounds to the dtype so we should do this
+    # here to get consistent results
+    xmin = float(np.array(xmin, dtype=dtype))
+    xmax = float(np.array(xmax, dtype=dtype))
+    ymin = float(np.array(ymin, dtype=dtype))
+    ymax = float(np.array(ymax, dtype=dtype))
 
     if xmax <= xmin or ymax <= ymin:
         return
-
-    values = values.astype(dtype)
-
-    size = len(values) // 3
 
     if weights:
         w = values[:size]
@@ -98,14 +108,10 @@ def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, 
         w = None
 
     x = values[size:size * 2]
-    y = values[size * 2:size * 3]
+    y = values[size * 2:]
 
-    try:
-        reference = np.histogram2d(x, y, bins=(nx, ny), weights=w,
-                                   range=((xmin, xmax), (ymin, ymax)))[0]
-    except Exception:
-        # If Numpy fails, we skip the comparison since this isn't our fault
-        return
+    reference = np.histogram2d(x, y, bins=(nx, ny), weights=w,
+                                range=((xmin, xmax), (ymin, ymax)))[0]
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435.
@@ -131,36 +137,34 @@ def test_2d_compare_with_numpy(values, nx, xmin, xmax, ny, ymin, ymax, weights, 
                          range=((xmin, xmax), (ymin, ymax)))
     np.testing.assert_array_equal(fast, fastdd)
 
-@given(values=arrays(dtype='<f8', shape=st.integers(0, 1000),
-                     elements=st.floats(-1000, 1000), unique=True),
+@given(size=st.integers(0, 50),
        hist_size=st.integers(1, 1e5),
-       bins=arrays(elements=st.integers(1, 10), shape=(10,), dtype=np.int32),
+       bins=arrays(elements=st.integers(1, 10), shape=st.integers(1, 5), dtype=np.int32),
        ranges=arrays(elements=st.floats(1e-10, 1e5), dtype='<f8',
                      shape=(10,), unique=True),
        weights=st.booleans(),
        dtype=st.sampled_from(['>f4', '<f4', '>f8', '<f8']))
-@settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow], deadline=None)
-def test_dd_compare_with_numpy(values, hist_size, bins, ranges, weights, dtype):
+@settings(max_examples=1000)
+def test_dd_compare_with_numpy(size, hist_size, bins, ranges, weights, dtype):
 
-    # To avoid generating huge histograms that take a long time, we only take
-    # as many dimensions as we can such that the total hist_size is still within the
-    # limit. If `hist_size = 1`, we will take all the leading ones in `bins`.
-    _bins = []
-    accum_size = 1
-    for i in range(10):
-        if bins[i] * accum_size > hist_size:
-            break
-        _bins.append(bins[i])
-        accum_size *= bins[i]
-    ndim = len(_bins)
-    values = values.astype(dtype)
+    ndim = len(bins)
+
+    # For now we randomly generate values ourselves - ideally we would make use
+    # of hypothesis to do this but when we do this we run into issues with the
+    # numpy implementation too. We have a separate test to make sure our
+    # implementation works with arbitrary hypothesis-generated arrays.
+    values = np.random.uniform(-1000, 1000, size * (ndim + 1)).astype(dtype)
+
     ranges = ranges.astype(dtype)
     ranges = ranges[:ndim]
+
     # Ranges are symmetric because otherwise the probability of samples falling inside
     # is just too small and we would just be testing a bunch of empty histograms.
     ranges = np.vstack((-ranges, ranges)).T
 
-    size = len(values) // (ndim + 1)
+    # Numpy will automatically cast the bounds to the dtype so we should do this
+    # here to get consistent results
+    ranges = ranges.astype(dtype)
 
     if weights:
         w = values[:size]
@@ -168,12 +172,8 @@ def test_dd_compare_with_numpy(values, hist_size, bins, ranges, weights, dtype):
         w = None
 
     sample = tuple(values[size*(i+1):size*(i+2)] for i in range(ndim))
-    # for simplicity using the same range in all dimensions
-    try:
-        reference = np.histogramdd(sample, bins=_bins, weights=w, range=ranges)[0]
-    except Exception:
-        # If Numpy fails, we skip the comparison since this isn't our fault
-        return
+
+    reference = np.histogramdd(sample, bins=bins, weights=w, range=ranges)[0]
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435.
@@ -188,7 +188,7 @@ def test_dd_compare_with_numpy(values, hist_size, bins, ranges, weights, dtype):
         n_inside = np.sum(inside)
         assume(n_inside == np.sum(reference))
 
-    fast = histogramdd(sample, bins=_bins, weights=w, range=ranges)
+    fast = histogramdd(sample, bins=bins, weights=w, range=ranges)
 
     if sample[0].dtype.kind == 'f' and sample[0].dtype.itemsize == 4:
         rtol = 1e-7
