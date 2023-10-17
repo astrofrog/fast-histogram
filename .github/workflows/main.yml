@@ -16,28 +16,38 @@ jobs:
         - linux: py37-test-numpy116
         - linux: py37-test-numpy117
         - linux: py38-test-numpy118
-        - linux: py39-test
-        - linux: py310-test
+        - linux: py39-test-numpy119
+        - linux: py39-test-numpy120
+        - linux: py39-test-numpy121
+        - linux: py39-test-numpy122
+        - linux: py39-test-numpy123
+        - linux: py310-test-numpy124
+        - linux: py310-test-numpy125
+        - linux: py311-test-numpy126
 
-        - macos: py36-test-numpy113
-        - macos: py36-test-numpy114
-        - macos: py36-test-numpy115
-        # The following two jobs are disabled due to an issue that seems
-        # specific to Python 3.7 and not worth investigating.
-        # - macos: py37-test-numpy116
-        # - macos: py37-test-numpy117
+        - macos: py37-test-numpy116
+        - macos: py37-test-numpy117
         - macos: py38-test-numpy118
-        - macos: py39-test
-        - macos: py310-test
+        - macos: py39-test-numpy119
+        - macos: py39-test-numpy120
+        - macos: py39-test-numpy121
+        - macos: py39-test-numpy122
+        - macos: py39-test-numpy123
+        - macos: py310-test-numpy124
+        - macos: py310-test-numpy125
+        - macos: py311-test-numpy126
 
-        - windows: py36-test-numpy113
-        - windows: py36-test-numpy114
-        - windows: py36-test-numpy115
         - windows: py37-test-numpy116
         - windows: py37-test-numpy117
         - windows: py38-test-numpy118
-        - windows: py39-test
-        - windows: py310-test
+        - windows: py39-test-numpy119
+        - windows: py39-test-numpy120
+        - windows: py39-test-numpy121
+        - windows: py39-test-numpy122
+        - windows: py39-test-numpy123
+        - windows: py310-test-numpy124
+        - windows: py310-test-numpy125
+        - windows: py311-test-numpy126
 
   publish:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@main
