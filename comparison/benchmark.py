@@ -1,7 +1,8 @@
 # Script to compare the speedup provided by fast-histogram
 
+from timeit import repeat, timeit
+
 import numpy as np
-from timeit import timeit, repeat
 
 SETUP_1D = """
 import numpy as np
@@ -29,7 +30,6 @@ TARGET_TIME = 1.0
 
 
 def time_stats(stmt=None, setup=None):
-
     # Call once to check how long it takes
     time_single = timeit(stmt=stmt, setup=setup, number=1)
 
@@ -37,34 +37,68 @@ def time_stats(stmt=None, setup=None):
     # times for accuracy
     number = max(3, int(TARGET_TIME / time_single))
 
-    print(' -> estimated time to complete test: {0:.1f}s'.format(time_single * 10 * number))
+    print(f" -> estimated time to complete test: {time_single * 10 * number:.1f}s")
 
     times = repeat(stmt=stmt, setup=setup, repeat=10, number=number)
 
     return np.min(times) / number, np.mean(times) / number, np.median(times) / number
 
 
-FMT_HEADER = '# {:7s}' + ' {:10s}' * 12 + '\n'
-FMT = '{:9d}' + ' {:10.7e}' * 12 + '\n'
+FMT_HEADER = "# {:7s}" + " {:10s}" * 12 + "\n"
+FMT = "{:9d}" + " {:10.7e}" * 12 + "\n"
 
-with open('benchmark_times.txt', 'w') as f:
-
-    f.write(FMT_HEADER.format('size',
-                              'np_1d_min', 'np_1d_mean', 'np_1d_median', 'fa_1d_min', 'fa_1d_mean', 'fa_1d_median',
-                              'np_2d_min', 'np_2d_mean', 'np_2d_median', 'fa_2d_min', 'fa_2d_mean', 'fa_2d_median'))
+with open("benchmark_times.txt", "w") as f:
+    f.write(
+        FMT_HEADER.format(
+            "size",
+            "np_1d_min",
+            "np_1d_mean",
+            "np_1d_median",
+            "fa_1d_min",
+            "fa_1d_mean",
+            "fa_1d_median",
+            "np_2d_min",
+            "np_2d_mean",
+            "np_2d_median",
+            "fa_2d_min",
+            "fa_2d_mean",
+            "fa_2d_median",
+        )
+    )
 
     for log10_size in range(0, 9):
+        size = int(10**log10_size)
 
-        size = int(10 ** log10_size)
+        print(f"Running benchmarks for size={size}")
 
-        print('Running benchmarks for size={0}'.format(size))
+        np_1d_min, np_1d_mean, np_1d_median = time_stats(
+            stmt=NUMPY_1D_STMT, setup=SETUP_1D.format(size=size)
+        )
+        fa_1d_min, fa_1d_mean, fa_1d_median = time_stats(
+            stmt=FAST_1D_STMT, setup=SETUP_1D.format(size=size)
+        )
+        np_2d_min, np_2d_mean, np_2d_median = time_stats(
+            stmt=NUMPY_2D_STMT, setup=SETUP_2D.format(size=size)
+        )
+        fa_2d_min, fa_2d_mean, fa_2d_median = time_stats(
+            stmt=FAST_2D_STMT, setup=SETUP_2D.format(size=size)
+        )
 
-        np_1d_min, np_1d_mean, np_1d_median = time_stats(stmt=NUMPY_1D_STMT, setup=SETUP_1D.format(size=size))
-        fa_1d_min, fa_1d_mean, fa_1d_median = time_stats(stmt=FAST_1D_STMT, setup=SETUP_1D.format(size=size))
-        np_2d_min, np_2d_mean, np_2d_median = time_stats(stmt=NUMPY_2D_STMT, setup=SETUP_2D.format(size=size))
-        fa_2d_min, fa_2d_mean, fa_2d_median = time_stats(stmt=FAST_2D_STMT, setup=SETUP_2D.format(size=size))
-
-        f.write(FMT.format(size,
-                           np_1d_min, np_1d_mean, np_1d_median, fa_1d_min, fa_1d_mean, fa_1d_median,
-                           np_2d_min, np_2d_mean, np_2d_median, fa_2d_min, fa_2d_mean, fa_2d_median))
+        f.write(
+            FMT.format(
+                size,
+                np_1d_min,
+                np_1d_mean,
+                np_1d_median,
+                fa_1d_min,
+                fa_1d_mean,
+                fa_1d_median,
+                np_2d_min,
+                np_2d_mean,
+                np_2d_median,
+                fa_2d_min,
+                fa_2d_mean,
+                fa_2d_median,
+            )
+        )
         f.flush()

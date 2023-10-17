@@ -1,19 +1,19 @@
-from __future__ import division
-
 import numbers
 
 import numpy as np
 
-from ._histogram_core import (_histogram1d,
-                              _histogram2d,
-                              _histogramdd,
-                              _histogram1d_weighted,
-                              _histogram2d_weighted,
-                              _histogramdd_weighted)
+from ._histogram_core import (
+    _histogram1d,
+    _histogram1d_weighted,
+    _histogram2d,
+    _histogram2d_weighted,
+    _histogramdd,
+    _histogramdd_weighted,
+)
 
-NUMERICAL_TYPES = {'f', 'i', 'u'}
+NUMERICAL_TYPES = {"f", "i", "u"}
 
-__all__ = ['histogram1d', 'histogram2d', 'histogramdd']
+__all__ = ["histogram1d", "histogram2d", "histogramdd"]
 
 
 def histogram1d(x, bins, range, weights=None):
@@ -40,7 +40,7 @@ def histogram1d(x, bins, range, weights=None):
     nx = bins
 
     if not np.isscalar(bins):
-        raise TypeError('bins should be an integer')
+        raise TypeError("bins should be an integer")
 
     xmin, xmax = range
 
@@ -66,7 +66,9 @@ def histogram1d(x, bins, range, weights=None):
     else:
         weights = np.atleast_1d(weights)
         if weights.dtype.kind not in NUMERICAL_TYPES:
-            raise TypeError("weights is not or cannot be converted to a numerical array")
+            raise TypeError(
+                "weights is not or cannot be converted to a numerical array"
+            )
         return _histogram1d_weighted(x, weights, nx, xmin, xmax)
 
 
@@ -99,7 +101,7 @@ def histogram2d(x, y, bins, range, weights=None):
         nx, ny = bins
 
     if not np.isscalar(nx) or not np.isscalar(ny):
-        raise TypeError('bins should be an iterable of two integers')
+        raise TypeError("bins should be an iterable of two integers")
 
     (xmin, xmax), (ymin, ymax) = range
 
@@ -141,7 +143,9 @@ def histogram2d(x, y, bins, range, weights=None):
     else:
         weights = np.atleast_1d(weights)
         if weights.dtype.kind not in NUMERICAL_TYPES:
-            raise TypeError("weights is not or cannot be converted to a numerical array")
+            raise TypeError(
+                "weights is not or cannot be converted to a numerical array"
+            )
         return _histogram2d_weighted(x, y, weights, nx, xmin, xmax, ny, ymin, ymax)
 
 
@@ -206,7 +210,9 @@ def histogramdd(sample, bins, range, weights=None):
         raise ValueError("number of ranges does not equal number of dimensions")
     for i, r in enumerate(range):
         if not len(r) == 2:
-            raise ValueError("should pass a minimum and maximum value for each dimension")
+            raise ValueError(
+                "should pass a minimum and maximum value for each dimension"
+            )
         if r[0] >= r[1]:
             raise ValueError("each range should be strictly increasing")
         _range[i][0] = r[0]
@@ -217,5 +223,7 @@ def histogramdd(sample, bins, range, weights=None):
     else:
         weights = np.atleast_1d(weights)
         if weights.dtype.kind not in NUMERICAL_TYPES:
-            raise TypeError("weights is not or cannot be converted to a numerical array")
+            raise TypeError(
+                "weights is not or cannot be converted to a numerical array"
+            )
         return _histogramdd_weighted(_sample, _bins, _range, weights)

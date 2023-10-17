@@ -24,3 +24,7 @@ CC = "gcc"
 select = "*-musllinux*"
 before-all = "apk add clang"
 environment = { CC="clang" }
+
+[tool.isort]
+profile = "black"
+line_length = 100
