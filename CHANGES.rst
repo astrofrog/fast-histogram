@@ -1,3 +1,8 @@
+0.12 (2023-10-17)
+-----------------
+
+- Fix segmentation faults under various conditions. [#62, #66]
+
 0.11 (2022-05-23)
 -----------------
 
