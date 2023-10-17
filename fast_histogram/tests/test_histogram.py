@@ -6,6 +6,37 @@ from hypothesis.extra.numpy import arrays
 
 from ..histogram import histogram1d, histogram2d, histogramdd
 
+# First some tests with hypothesis value generation to make sure our
+# implementation doesn't crash, and do basic checks of validity of the output.
+
+
+@given(
+    values=arrays(
+        dtype="<f8",
+        shape=st.integers(0, 20),
+        elements=st.floats(-1000, 1000, allow_subnormal=False),
+        unique=True,
+    ),
+    nx=st.integers(1, 10),
+    xmin=st.floats(-1e10, 1e10),
+    xmax=st.floats(-1e10, 1e10),
+    weights=st.booleans(),
+    dtype=st.sampled_from([">f4", "<f4", ">f8", "<f8"]),
+)
+@settings(max_examples=1000)
+def test_1d_basic(values, nx, xmin, xmax, weights, dtype):
+    if xmax <= xmin:
+        assume(False)
+    size = len(values) // 2
+    w = values[:size] if weights else None
+    x = values[size : size * 2]
+    fast = histogram1d(x, bins=nx, weights=w, range=(xmin, xmax))
+    if weights:
+        assert np.sum(fast) == np.sum(w[(x <= xmax) & (x >= xmin)])
+    else:
+        assert np.sum(fast) == np.sum((x <= xmax) & (x >= xmin))
+
+
 # NOTE: For now we randomly generate values ourselves when comparing to Numpy -
 # ideally we would make use of hypothesis to do this but when we do this we run
 # into issues with the numpy implementation too. We have a separate test to
