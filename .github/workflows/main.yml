@@ -4,12 +4,15 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   tests:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@main
     with:
-      coverage: codecov
       runs-on: |
         linux: ubuntu-22.04
       envs: |
@@ -22,6 +25,7 @@ jobs:
         - linux: py310-test-numpy124
         - linux: py310-test-numpy125
         - linux: py311-test-numpy126
+        - linux: py312-test-numpydev
 
         - macos: py38-test-numpy118
         - macos: py39-test-numpy119
