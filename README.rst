@@ -1,4 +1,4 @@
-|CI Status| |asv|
+|CI Status| |asv| |PyPI|
 
 About
 -----
@@ -158,3 +158,7 @@ pull request to improve things.
 
 .. |asv| image:: https://img.shields.io/badge/benchmarked%20by-asv-brightgreen.svg
    :target: https://astrofrog.github.io/fast-histogram
+
+.. |PyPI| image:: https://img.shields.io/pypi/v/fast-histogram.svg
+    :target: https://pypi.org/project/fast-histogram/
+    :alt: PyPI release
