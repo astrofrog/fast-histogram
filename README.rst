@@ -58,7 +58,7 @@ histogram:
 The version here is over 20 times faster! The following plot shows the
 speedup as a function of array size for the bin parameters shown above:
 
-.. figure:: https://github.com/astrofrog/fast-histogram/raw/master/speedup_compared.png
+.. figure:: https://github.com/astrofrog/fast-histogram/raw/main/speedup_compared.png
    :alt: Comparison of performance between Numpy and fast-histogram
 
 as well as results for the 1D case, also with 30 bins. The speedup for
