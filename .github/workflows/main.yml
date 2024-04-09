@@ -11,7 +11,7 @@ concurrency:
 jobs:
 
   tests:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@main
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
       runs-on: |
         linux: ubuntu-22.04
@@ -48,7 +48,7 @@ jobs:
         - windows: py311-test-numpy126
 
   publish:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@main
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
     with:
       test_extras: test
       test_command: pytest --pyargs fast_histogram -m "not hypothesis"
