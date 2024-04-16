@@ -1,3 +1,26 @@
+## v0.13 - 2024-04-16
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+The main change in this release is added support for Numpy 2.0.
+
+#### Other Changes
+
+* Clean up test matrix by @pllim in https://github.com/astrofrog/fast-histogram/pull/82
+* Use v1 workflow, not main by @pllim in https://github.com/astrofrog/fast-histogram/pull/79
+* Fix link to benchmark plot in README by @pllim in https://github.com/astrofrog/fast-histogram/pull/78
+* Add PyPI badge by @pllim in https://github.com/astrofrog/fast-histogram/pull/75
+* Remove wheel from build requirements by @pllim in https://github.com/astrofrog/fast-histogram/pull/74
+* Build against Numpy 2.0.0rc1 for Python>=3.9 by @astrofrog in https://github.com/astrofrog/fast-histogram/pull/86
+
+### New Contributors
+
+* @pre-commit-ci made their first contribution in https://github.com/astrofrog/fast-histogram/pull/70
+* @pllim made their first contribution in https://github.com/astrofrog/fast-histogram/pull/82
+
+**Full Changelog**: https://github.com/astrofrog/fast-histogram/compare/v0.12...v0.13
+
 ## 0.12 (2023-10-17)
 
 - Fix segmentation faults under various conditions. [#62, #66]
