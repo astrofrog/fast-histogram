@@ -25,6 +25,7 @@ jobs:
         - linux: py310-test-numpy124
         - linux: py310-test-numpy125
         - linux: py311-test-numpy126
+        - linux: py311-test-numpy20
         - linux: py312-test-numpydev
 
         - macos: py38-test-numpy118
@@ -36,6 +37,7 @@ jobs:
         - macos: py310-test-numpy124
         - macos: py310-test-numpy125
         - macos: py311-test-numpy126
+        - macos: py311-test-numpy20
 
         - windows: py38-test-numpy118
         - windows: py39-test-numpy119
@@ -46,6 +48,7 @@ jobs:
         - windows: py310-test-numpy124
         - windows: py310-test-numpy125
         - windows: py311-test-numpy126
+        - windows: py311-test-numpy20
 
   publish:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
