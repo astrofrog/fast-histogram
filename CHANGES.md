@@ -1,3 +1,12 @@
+## v0.14 - 2024-04-16
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+Fixed compatibility with Numpy 2.0 by bumping minimum required Python to 3.9 in https://github.com/astrofrog/fast-histogram/pull/87 - this will ensure that the `abi3` wheels are built for Python 3.9 with Numpy 2.0 instead of Python 3.8 with Numpy 1.x.
+
+**Full Changelog**: https://github.com/astrofrog/fast-histogram/compare/v0.13...v0.14
+
 ## v0.13 - 2024-04-16
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
