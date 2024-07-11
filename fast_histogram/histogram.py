@@ -1,5 +1,6 @@
 import numbers
 
+import time
 import numpy as np
 
 from ._histogram_core import (
@@ -36,6 +37,8 @@ def histogram1d(x, bins, range, weights=None):
     array : `~numpy.ndarray`
         The 1D histogram array
     """
+
+    time.sleep(0.1)
 
     nx = bins
 
