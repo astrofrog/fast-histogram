@@ -26,3 +26,6 @@ environment = { CC="clang" }
 [tool.isort]
 profile = "black"
 line_length = 100
+
+[tool.setuptools_scm]
+write_to = "fast_histogram/version.py"
