@@ -1,8 +1,6 @@
 [build-system]
-requires = ["setuptools",
-            "setuptools_scm",
-            "numpy>=2.0.0rc1"]
-build-backend = 'setuptools.build_meta'
+build-backend = 'mesonpy'
+requires = ['meson-python']
 
 [tool.cibuildwheel.linux]
 skip = "pp310* pp311* pp312*"
@@ -26,3 +24,25 @@ environment = { CC="clang" }
 [tool.isort]
 profile = "black"
 line_length = 100
+
+
+[project]
+name = "fast-histogram"
+description = "Fast simple 1D and 2D histograms"
+readme = "README.rst"
+requires-python = ">=3.9"
+dependencies = [ "numpy",]
+version = "1.0.0"
+
+[[project.authors]]
+name = "Thomas Robitaille"
+email = "thomas.robitaille@gmail.com"
+
+[project.license]
+text = "BSD"
+
+[project.urls]
+Homepage = "https://github.com/astrofrog/fast-histogram"
+
+[project.optional-dependencies]
+test = [ "pytest", "hypothesis[numpy]",]
