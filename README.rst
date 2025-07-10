@@ -3,7 +3,7 @@
 About
 -----
 
-Sometimes you just want to compute simple 1D, 2D, multidimensional histograms with regular bins. Fast. No
+Sometimes you just want to compute simple 1D, 2D, or multidimensional histograms with regular bins. Fast. No
 nonsense. `Numpy's <http://www.numpy.org>`__ histogram functions are
 versatile, and can handle for example non-regular binning, but this
 versatility comes at the expense of performance.
