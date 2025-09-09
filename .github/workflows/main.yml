@@ -65,3 +65,19 @@ jobs:
         - windows
     secrets:
       pypi_token: ${{ secrets.PYPI_TOKEN }}
+
+  # The following is a separate job because we need to set CIBW_PLATFORM
+  # See https://github.com/OpenAstronomy/github-actions-workflows/issues/308
+
+  publish_wasm32:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
+    with:
+      test_extras: test
+      test_command: pytest --pyargs fast_histogram -m "not hypothesis"
+      sdist-runs-on: ubuntu-22.04
+      targets: |
+        - cp*-pyodide_wasm32
+      env: |
+        CIBW_PLATFORM: pyodide
+    secrets:
+      pypi_token: ${{ secrets.PYPI_TOKEN }}
