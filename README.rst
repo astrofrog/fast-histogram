@@ -3,7 +3,7 @@
 About
 -----
 
-Sometimes you just want to compute simple 1D or 2D histograms with regular bins. Fast. No
+Sometimes you just want to compute simple 1D, 2D, or multidimensional histograms with regular bins. Fast. No
 nonsense. `Numpy's <http://www.numpy.org>`__ histogram functions are
 versatile, and can handle for example non-regular binning, but this
 versatility comes at the expense of performance.
@@ -13,8 +13,9 @@ histogram functions for regular bins that don't compromise on performance. It do
 anything complicated - it just implements a simple histogram algorithm
 in C and keeps it simple. The aim is to have functions that are fast but
 also robust and reliable. The result is a 1D histogram function here that
-is **7-15x faster** than ``numpy.histogram``, and a 2D histogram function
-that is **20-25x faster** than ``numpy.histogram2d``.
+is **2-15x faster** than ``numpy.histogram``, a 2D histogram function
+that is **10x faster** than ``numpy.histogram2d``, and a multidimensional
+histogram function that is **5-10x faster** than ``numpy.histogramdd``.
 
 To install::
 
@@ -24,12 +25,12 @@ or if you use conda you can instead do::
 
     conda install -c conda-forge fast-histogram
 
-The ``fast_histogram`` module then provides two functions:
-``histogram1d`` and ``histogram2d``:
+The ``fast_histogram`` module then provides three functions:
+``histogram1d``, ``histogram2d``, and ``histogramdd``:
 
 .. code:: python
 
-    from fast_histogram import histogram1d, histogram2d
+    from fast_histogram import histogram1d, histogram2d, histogramdd
 
 Example
 -------
@@ -46,24 +47,26 @@ histogram:
     In [3]: y = np.random.random(10_000_000)
 
     In [4]: %timeit _ = np.histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)
-    935 ms ± 58.4 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    562 ms ± 5.83 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
     In [5]: from fast_histogram import histogram2d
 
     In [6]: %timeit _ = histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)
-    40.2 ms ± 624 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    55.9 ms ± 583 μs per loop (mean ± std. dev. of 7 runs, 10 loops each)
 
 (note that ``10_000_000`` is possible in Python 3.6 syntax, use ``10000000`` instead in previous versions)
 
-The version here is over 20 times faster! The following plot shows the
+The version here is over 10 times faster! The following plot shows the
 speedup as a function of array size for the bin parameters shown above:
 
 .. figure:: https://github.com/astrofrog/fast-histogram/raw/main/speedup_compared.png
    :alt: Comparison of performance between Numpy and fast-histogram
 
-as well as results for the 1D case, also with 30 bins. The speedup for
-the 2D case is consistently between 20-25x, and for the 1D case goes
-from 15x for small arrays to around 7x for large arrays.
+as well as results for the 1D and 3D cases, also with 30 bins. The speedup for
+the 2D case is consistently between 10-12x, and for the 1D case goes
+from 15x for small arrays to around 2x for large arrays.
+We have benchmarked the ``histogramdd`` function with a 3D array, and the speedup
+is found to be between 5-10x.
 
 Q&A
 ---

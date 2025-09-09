@@ -25,6 +25,18 @@ y = np.random.random({size})
 NUMPY_2D_STMT = "np_histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)"
 FAST_2D_STMT = "histogram2d(x, y, range=[[-1, 2], [-2, 4]], bins=30)"
 
+SETUP_3D = """
+import numpy as np
+from numpy import histogramdd as np_histogramdd
+from fast_histogram import histogramdd
+x = np.random.random({size})
+y = np.random.random({size})
+z = np.random.random({size})
+"""
+
+NUMPY_3D_STMT = "np_histogramdd(np.column_stack([x, y, z]), range=[[-1, 2], [-2, 4], [-2, 4]], bins=30)"
+FAST_3D_STMT = "histogramdd(np.column_stack([x, y, z]), range=[[-1, 2], [-2, 4], [-2, 4]], bins=30)"
+
 # How long each benchmark should aim to take
 TARGET_TIME = 1.0
 
@@ -44,8 +56,8 @@ def time_stats(stmt=None, setup=None):
     return np.min(times) / number, np.mean(times) / number, np.median(times) / number
 
 
-FMT_HEADER = "# {:7s}" + " {:10s}" * 12 + "\n"
-FMT = "{:9d}" + " {:10.7e}" * 12 + "\n"
+FMT_HEADER = "# {:7s}" + " {:10s}" * 18 + "\n"
+FMT = "{:9d}" + " {:10.7e}" * 18 + "\n"
 
 with open("benchmark_times.txt", "w") as f:
     f.write(
@@ -63,6 +75,12 @@ with open("benchmark_times.txt", "w") as f:
             "fa_2d_min",
             "fa_2d_mean",
             "fa_2d_median",
+            "np_3d_min",
+            "np_3d_mean",
+            "np_3d_median",
+            "fa_3d_min",
+            "fa_3d_mean",
+            "fa_3d_median",
         )
     )
 
@@ -83,6 +101,12 @@ with open("benchmark_times.txt", "w") as f:
         fa_2d_min, fa_2d_mean, fa_2d_median = time_stats(
             stmt=FAST_2D_STMT, setup=SETUP_2D.format(size=size)
         )
+        np_3d_min, np_3d_mean, np_3d_median = time_stats(
+            stmt=NUMPY_3D_STMT, setup=SETUP_3D.format(size=size)
+        )
+        fa_3d_min, fa_3d_mean, fa_3d_median = time_stats(
+            stmt=FAST_3D_STMT, setup=SETUP_3D.format(size=size)
+        )
 
         f.write(
             FMT.format(
@@ -99,6 +123,12 @@ with open("benchmark_times.txt", "w") as f:
                 fa_2d_min,
                 fa_2d_mean,
                 fa_2d_median,
+                np_3d_min,
+                np_3d_mean,
+                np_3d_median,
+                fa_3d_min,
+                fa_3d_mean,
+                fa_3d_median,
             )
         )
         f.flush()
