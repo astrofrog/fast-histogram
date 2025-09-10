@@ -1,3 +1,17 @@
+## v0.15 - 2025-09-10
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+### What's Changed
+
+* Mentioned the histogramdd function in the README by @prajwel in https://github.com/astrofrog/fast-histogram/pull/94
+* Build wasm32 wheels by @astrofrog in https://github.com/astrofrog/fast-histogram/pull/95
+
+### New Contributors
+
+* @prajwel made their first contribution in https://github.com/astrofrog/fast-histogram/pull/94
+
+**Full Changelog**: https://github.com/astrofrog/fast-histogram/compare/v0.14...v0.15
+
 ## v0.14 - 2024-04-16
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
