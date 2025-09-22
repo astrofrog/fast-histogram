@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -10,7 +10,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
         name: isort (python)
@@ -18,12 +18,12 @@ repos:
           - "--filter-files"
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.16.0
+    rev: v3.20.0
     hooks:
       - id: pyupgrade
         args: ["--py39-plus"]
 
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 25.9.0
     hooks:
       - id: black
