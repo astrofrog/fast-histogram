@@ -1,47 +1,50 @@
-build-backend = 'mesonpy'
-requires = ['meson-python']
-
-[tool.cibuildwheel.linux]
-skip = "pp312*"
-archs = ["auto", "aarch64"]
-
-[tool.cibuildwheel.macos]
-skip = "pp*"
-archs = ["x86_64", "arm64"]
-
-[tool.cibuildwheel.windows]
-skip = "pp*"
-
-[tool.cibuildwheel.linux.environment]
-CC = "gcc"
-
-[[tool.cibuildwheel.overrides]]
-select = "*-musllinux*"
-before-all = "apk add clang"
-environment = { CC="clang" }
-
-[tool.isort]
-profile = "black"
-line_length = 100
-
+[build-system]
+build-backend = "mesonpy"
+requires = ["meson-python", "numpy"]
 
 [project]
 name = "fast-histogram"
 description = "Fast simple 1D and 2D histograms"
 readme = "README.rst"
-requires-python = ">=3.9"
-dependencies = [ "numpy",]
-version = "1.0.0"
-
-[[project.authors]]
-name = "Thomas Robitaille"
-email = "thomas.robitaille@gmail.com"
-
-[project.license]
-text = "BSD"
+license = "BSD-2-Clause"
+requires-python = ">=3.10"
+dependencies = ["numpy"]
+dynamic = ["version"]
+authors = [
+    {name = "Thomas Robitaille", email = "thomas.robitaille@gmail.com"},
+]
 
 [project.urls]
 Homepage = "https://github.com/astrofrog/fast-histogram"
 
 [project.optional-dependencies]
-test = [ "pytest", "hypothesis[numpy]",]
+test = ["pytest", "hypothesis[numpy]"]
+
+[tool.meson-python]
+limited-api = true
+
+[tool.meson-python.args]
+install = ['--skip-subprojects']
+
+[tool.cibuildwheel]
+# Build only with Python 3.10 to get cp310-abi3 wheels that work on all 3.10+
+build = ["cp310-*"]
+skip = ["pp*"]
+
+[tool.cibuildwheel.linux]
+archs = ["auto", "aarch64"]
+
+[tool.cibuildwheel.linux.environment]
+CC = "gcc"
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+before-all = "apk add clang"
+environment = {CC = "clang"}
+
+[tool.isort]
+profile = "black"
+line_length = 100
