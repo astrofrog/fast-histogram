@@ -16,36 +16,29 @@ jobs:
       runs-on: |
         linux: ubuntu-22.04
       envs: |
-        - linux: py39-test-numpy119
-        - linux: py39-test-numpy120
-        - linux: py39-test-numpy121
-        - linux: py39-test-numpy122
-        - linux: py39-test-numpy123
         - linux: py310-test-numpy124
         - linux: py310-test-numpy125
         - linux: py311-test-numpy126
         - linux: py311-test-numpy20
-        - linux: py312-test-numpydev
+        - linux: py312-test-numpy20
+        - linux: py313-test-numpy21
+        - linux: py314-test-numpydev
 
-        - macos: py39-test-numpy119
-        - macos: py39-test-numpy120
-        - macos: py39-test-numpy121
-        - macos: py39-test-numpy122
-        - macos: py39-test-numpy123
         - macos: py310-test-numpy124
         - macos: py310-test-numpy125
         - macos: py311-test-numpy126
         - macos: py311-test-numpy20
+        - macos: py312-test-numpy20
+        - macos: py313-test-numpy21
+        - macos: py314-test-numpydev
 
-        - windows: py39-test-numpy119
-        - windows: py39-test-numpy120
-        - windows: py39-test-numpy121
-        - windows: py39-test-numpy122
-        - windows: py39-test-numpy123
         - windows: py310-test-numpy124
         - windows: py310-test-numpy125
         - windows: py311-test-numpy126
         - windows: py311-test-numpy20
+        - windows: py312-test-numpy20
+        - windows: py313-test-numpy21
+        - windows: py314-test-numpydev
 
   publish:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
