@@ -4,6 +4,12 @@ py.install_sources(
   subdir: 'fast_histogram',
 )
 
+py.install_sources(
+  'tests/__init__.py',
+  'tests/test_histogram.py',
+  subdir: 'fast_histogram/tests',
+)
+
 # Use run_command to get numpy includes - this is more compatible with limited API
 # since dependency('numpy') may add flags that conflict with Py_LIMITED_API
 incdir_numpy = run_command(py,
