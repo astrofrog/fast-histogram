@@ -15,23 +15,30 @@ jobs:
     with:
       runs-on: |
         linux: ubuntu-22.04
-        macos: macos-14
       envs: |
         - linux: py310-test-numpy124
         - linux: py310-test-numpy125
         - linux: py311-test-numpy126
         - linux: py311-test-numpy20
-        - linux: py312-test-numpydev
+        - linux: py312-test-numpy20
+        - linux: py313-test-numpy20
+        - linux: py314-test-numpydev
 
         - macos: py310-test-numpy124
         - macos: py310-test-numpy125
         - macos: py311-test-numpy126
         - macos: py311-test-numpy20
+        - macos: py312-test-numpy20
+        - macos: py313-test-numpy20
+        - macos: py314-test-numpydev
 
         - windows: py310-test-numpy124
         - windows: py310-test-numpy125
         - windows: py311-test-numpy126
         - windows: py311-test-numpy20
+        - windows: py312-test-numpy20
+        - windows: py313-test-numpy20
+        - windows: py314-test-numpydev
 
   publish:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
