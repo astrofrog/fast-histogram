@@ -17,7 +17,7 @@ incdir_numpy = run_command(py,
   check: true
 ).stdout().strip()
 
-inc_np = include_directories(incdir_numpy)
+inc_np = include_directories(incdir_numpy, is_system: true)
 
 py.extension_module(
   '_histogram_core',
