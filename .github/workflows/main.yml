@@ -21,7 +21,7 @@ jobs:
         - linux: py311-test-numpy126
         - linux: py311-test-numpy20
         - linux: py312-test-numpy20
-        - linux: py313-test-numpy20
+        - linux: py313-test-numpy21
         - linux: py314-test-numpydev
 
         - macos: py310-test-numpy124
@@ -29,7 +29,7 @@ jobs:
         - macos: py311-test-numpy126
         - macos: py311-test-numpy20
         - macos: py312-test-numpy20
-        - macos: py313-test-numpy20
+        - macos: py313-test-numpy21
         - macos: py314-test-numpydev
 
         - windows: py310-test-numpy124
@@ -37,7 +37,7 @@ jobs:
         - windows: py311-test-numpy126
         - windows: py311-test-numpy20
         - windows: py312-test-numpy20
-        - windows: py313-test-numpy20
+        - windows: py313-test-numpy21
         - windows: py314-test-numpydev
 
   publish:
