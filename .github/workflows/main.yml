@@ -57,4 +57,3 @@ jobs:
         - windows
     secrets:
       pypi_token: ${{ secrets.PYPI_TOKEN }}
-
