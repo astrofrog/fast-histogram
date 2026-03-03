@@ -1,2 +1,5 @@
+from importlib.metadata import version
+
 from .histogram import *
-from .version import version as __version__
+
+__version__ = version("fast-histogram")

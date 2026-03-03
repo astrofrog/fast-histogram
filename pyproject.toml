@@ -1,27 +1,58 @@
 [build-system]
-requires = ["setuptools",
-            "setuptools_scm",
-            "numpy>=2"]
-build-backend = 'setuptools.build_meta'
+build-backend = "mesonpy"
+requires = ["meson-python", "numpy"]
+
+[project]
+name = "fast-histogram"
+description = "Fast simple 1D and 2D histograms"
+readme = "README.rst"
+license = "BSD-2-Clause"
+requires-python = ">=3.10"
+dependencies = ["numpy"]
+dynamic = ["version"]
+authors = [
+    {name = "Thomas Robitaille", email = "thomas.robitaille@gmail.com"},
+]
+
+[project.urls]
+Homepage = "https://github.com/astrofrog/fast-histogram"
+
+[project.optional-dependencies]
+test = ["pytest", "hypothesis[numpy]"]
+
+[tool.meson-python]
+limited-api = true
+
+[tool.meson-python.args]
+install = ['--skip-subprojects']
+
+[tool.cibuildwheel]
+# Build cp310 for abi3 wheels (works on all CPython 3.10+) and PyPy
+build = ["cp310-*", "pp310-*"]
 
 [tool.cibuildwheel.linux]
-skip = "pp312*"
 archs = ["auto", "aarch64"]
-
-[tool.cibuildwheel.macos]
-skip = "pp*"
-archs = ["x86_64", "arm64"]
-
-[tool.cibuildwheel.windows]
-skip = "pp*"
 
 [tool.cibuildwheel.linux.environment]
 CC = "gcc"
 
+[tool.cibuildwheel.macos]
+archs = ["arm64"]
+skip = ["pp*"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+skip = ["*-win32"]
+
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux*"
 before-all = "apk add clang"
-environment = { CC="clang" }
+environment = {CC = "clang"}
+
+# PyPy doesn't support limited API, so disable it for PyPy builds
+[[tool.cibuildwheel.overrides]]
+select = "pp*"
+config-settings = {"setup-args" = "-Dpython.allow_limited_api=false"}
 
 [tool.isort]
 profile = "black"
