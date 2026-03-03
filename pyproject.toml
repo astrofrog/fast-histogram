@@ -54,6 +54,12 @@ environment = {CC = "clang"}
 select = "pp*"
 config-settings = {"setup-args" = "-Dpython.allow_limited_api=false"}
 
+# Pyodide builds need pkg-config and limited API disabled
+[[tool.cibuildwheel.overrides]]
+select = "*-pyodide*"
+before-all = "apt-get update && apt-get install -y pkg-config"
+config-settings = {"setup-args" = "-Dpython.allow_limited_api=false"}
+
 [tool.isort]
 profile = "black"
 line_length = 100
