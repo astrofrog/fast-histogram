@@ -41,6 +41,9 @@ archs = ["x86_64", "arm64"]
 skip = ["pp*"]
 before-all = "brew install pkg-config"
 
+[tool.cibuildwheel.macos.environment]
+PATH = "/opt/homebrew/bin:$PATH"
+
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
 skip = ["*-win32"]
