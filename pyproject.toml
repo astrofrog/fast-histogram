@@ -43,6 +43,7 @@ before-all = "brew install pkg-config"
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
+skip = ["*-win32"]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux*"
