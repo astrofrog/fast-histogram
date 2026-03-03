@@ -37,12 +37,8 @@ archs = ["auto", "aarch64"]
 CC = "gcc"
 
 [tool.cibuildwheel.macos]
-archs = ["x86_64", "arm64"]
+archs = ["arm64"]
 skip = ["pp*"]
-before-all = "brew install pkg-config"
-
-[tool.cibuildwheel.macos.environment]
-PATH = "/opt/homebrew/bin:$PATH"
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
@@ -56,12 +52,6 @@ environment = {CC = "clang"}
 # PyPy doesn't support limited API, so disable it for PyPy builds
 [[tool.cibuildwheel.overrides]]
 select = "pp*"
-config-settings = {"setup-args" = "-Dpython.allow_limited_api=false"}
-
-# Pyodide builds need pkg-config and limited API disabled
-[[tool.cibuildwheel.overrides]]
-select = "*-pyodide*"
-before-all = "apt-get update && apt-get install -y pkg-config"
 config-settings = {"setup-args" = "-Dpython.allow_limited_api=false"}
 
 [tool.isort]
