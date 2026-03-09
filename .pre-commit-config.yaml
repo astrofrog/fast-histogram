@@ -24,6 +24,6 @@ repos:
         args: ["--py310-plus"]
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.1.0
+    rev: 26.3.0
     hooks:
       - id: black
