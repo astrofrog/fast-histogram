@@ -114,7 +114,6 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     Py_DECREF(x_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -128,7 +127,6 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
     NpyIter_Deallocate(iter);
     Py_DECREF(x_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -260,7 +258,6 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -275,7 +272,6 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -732,7 +728,6 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(w_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -747,7 +742,6 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(w_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -890,7 +884,6 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(y_array);
     Py_DECREF(w_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -906,7 +899,6 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(y_array);
     Py_DECREF(w_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
