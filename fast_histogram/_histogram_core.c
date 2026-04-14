@@ -552,6 +552,8 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     for (int i = 0; i < ndim; i++){
      Py_XDECREF(arrays[i]);
     }
+    Py_XDECREF(range);
+    Py_XDECREF(bins);
     Py_DECREF(count_obj);
     free(arrays);
     free(dims);
@@ -574,6 +576,8 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     for (int i = 0; i < ndim; i++){
       Py_XDECREF(arrays[i]);
     }
+    Py_XDECREF(range);
+    Py_XDECREF(bins);
     Py_DECREF(count_obj);
     free(arrays);
     free(dims);
@@ -1207,6 +1211,8 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     for (int i = 0; i < ndim + 1; i++){
      Py_XDECREF(arrays[i]);
     }
+    Py_XDECREF(range);
+    Py_XDECREF(bins);
     Py_DECREF(count_obj);
     free(arrays);
     free(dims);
@@ -1229,6 +1235,8 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     for (int i = 0; i < ndim + 1; i++){
       Py_XDECREF(arrays[i]);
     }
+    Py_XDECREF(range);
+    Py_XDECREF(bins);
     Py_DECREF(count_obj);
     free(arrays);
     free(dims);
