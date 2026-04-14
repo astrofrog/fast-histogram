@@ -522,3 +522,15 @@ def test_invalid_list():
             bins=10,
             range=((0, 10), (0, 10), (0, 10)),
         )
+
+
+@pytest.mark.parametrize("use_weights", [False, True])
+def test_histogramdd_mismatched_lengths(use_weights):
+    # Regression test for a bug where the dimension-mismatch error cleanup
+    # loop used the wrong variable (arrays[i] instead of arrays[j]), causing
+    # a use-after-free on one array and leaking all others.
+    a = np.array([1.0, 2.0])
+    b = np.array([1.0, 2.0, 3.0])
+    w = np.array([1.0, 2.0]) if use_weights else None
+    with pytest.raises(RuntimeError, match="Lengths"):
+        histogramdd((a, b), bins=10, range=[(0, 10), (0, 10)], weights=w)
