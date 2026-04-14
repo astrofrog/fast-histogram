@@ -401,7 +401,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
       if (!((long)PyArray_DIM(arrays[i], 0) == n)){
         PyErr_SetString(PyExc_RuntimeError, "Lengths of sample arrays do not match.");
         for (int j = 0; j < ndim; j++){
-          Py_XDECREF(arrays[i]);
+          Py_XDECREF(arrays[j]);
         }
         Py_XDECREF(range);
         Py_XDECREF(bins);
