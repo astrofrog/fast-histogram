@@ -360,6 +360,9 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   }
 
   ndim = (int)PyTuple_Size(sample_obj);
+  if (ndim < 0) {
+    return NULL;
+  }
 
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * ndim);
@@ -991,6 +994,9 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   }
 
   ndim = (int)PyTuple_Size(sample_obj);
+  if (ndim < 0) {
+    return NULL;
+  }
 
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * (ndim + 1));
