@@ -371,6 +371,9 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
 
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * ndim);
+  if (arrays == NULL) {
+    return PyErr_NoMemory();
+  }
   sample_parsing_success = 1;
   for (int i = 0; i < ndim; i++){
     arrays[i] = (PyArrayObject *)PyArray_FROM_O(PyTuple_GetItem(sample_obj, i));
@@ -1020,6 +1023,9 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
 
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * (ndim + 1));
+  if (arrays == NULL) {
+    return PyErr_NoMemory();
+  }
   sample_parsing_success = 1;
   for (int i = 0; i < ndim; i++){
     arrays[i] = (PyArrayObject *)PyArray_FROM_O(PyTuple_GetItem(sample_obj, i));
