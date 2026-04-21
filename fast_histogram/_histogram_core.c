@@ -1,5 +1,5 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#define Py_LIMITED_API 0x030900f0
+#define Py_LIMITED_API 0x030a00f0
 
 #include <Python.h>
 #include <numpy/arrayobject.h>
@@ -110,11 +110,11 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
   iter = NpyIter_New(x_array,
                      NPY_ITER_READONLY | NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                      NPY_KEEPORDER, NPY_SAFE_CASTING, dtype);
+  Py_DECREF(dtype);
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     Py_DECREF(x_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -128,7 +128,6 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args) {
     NpyIter_Deallocate(iter);
     Py_DECREF(x_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -195,7 +194,7 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
   NpyIter_IterNextFunc *iternext;
   char **dataptr;
   npy_intp *strideptr, *innersizeptr;
-  PyArray_Descr *dtypes[] = {PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE)};
+  PyArray_Descr *dtypes[2];
   npy_uint32 op_flags[] = {NPY_ITER_READONLY, NPY_ITER_READONLY};
 
   /* Parse the input tuple */
@@ -251,16 +250,19 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
 
   arrays[0] = x_array;
   arrays[1] = y_array;
+  dtypes[0] = PyArray_DescrFromType(NPY_DOUBLE);
+  dtypes[1] = PyArray_DescrFromType(NPY_DOUBLE);
   iter = NpyIter_AdvancedNew(2, arrays,
                              NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                              NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
                              -1, NULL, NULL, 0);
+  Py_DECREF(dtypes[0]);
+  Py_DECREF(dtypes[1]);
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -275,7 +277,6 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -364,9 +365,15 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   }
 
   ndim = (int)PyTuple_Size(sample_obj);
+  if (ndim < 0) {
+    return NULL;
+  }
 
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * ndim);
+  if (arrays == NULL) {
+    return PyErr_NoMemory();
+  }
   sample_parsing_success = 1;
   for (int i = 0; i < ndim; i++){
     arrays[i] = (PyArrayObject *)PyArray_FROM_O(PyTuple_GetItem(sample_obj, i));
@@ -401,7 +408,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
       if (!((long)PyArray_DIM(arrays[i], 0) == n)){
         PyErr_SetString(PyExc_RuntimeError, "Lengths of sample arrays do not match.");
         for (int j = 0; j < ndim; j++){
-          Py_XDECREF(arrays[i]);
+          Py_XDECREF(arrays[j]);
         }
         Py_XDECREF(range);
         Py_XDECREF(bins);
@@ -414,6 +421,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   /* copy the content of `bins` into `dims` */
   dtype = PyArray_DescrFromType(NPY_INTP);
   iter = NpyIter_New(bins, NPY_ITER_READONLY, NPY_CORDER, NPY_SAFE_CASTING, dtype);
+  Py_DECREF(dtype);
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator over binning.");
     for (int i = 0; i < ndim; i++){
@@ -480,6 +488,7 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
   range_c = (double *)malloc(sizeof(double) * ndim * 2);
   dtype = PyArray_DescrFromType(NPY_DOUBLE);
   iter = NpyIter_New(range, NPY_ITER_READONLY, NPY_CORDER, NPY_SAFE_CASTING, dtype);
+  Py_DECREF(dtype);
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator over range. This needs to be passed as type `numpy.double`.");
     for (int i = 0; i < ndim; i++){
@@ -535,11 +544,16 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
                              NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                              NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
                              -1, NULL, NULL, 0);
+  for (int i = 0; i < ndim; i++){
+    Py_DECREF(dtypes[i]);
+  }
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     for (int i = 0; i < ndim; i++){
      Py_XDECREF(arrays[i]);
     }
+    Py_XDECREF(range);
+    Py_XDECREF(bins);
     Py_DECREF(count_obj);
     free(arrays);
     free(dims);
@@ -562,6 +576,8 @@ static PyObject *_histogramdd(PyObject *self, PyObject *args) {
     for (int i = 0; i < ndim; i++){
       Py_XDECREF(arrays[i]);
     }
+    Py_XDECREF(range);
+    Py_XDECREF(bins);
     Py_DECREF(count_obj);
     free(arrays);
     free(dims);
@@ -668,7 +684,7 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
   NpyIter_IterNextFunc *iternext;
   char **dataptr;
   npy_intp *strideptr, *innersizeptr;
-  PyArray_Descr *dtypes[] = {PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE)};
+  PyArray_Descr *dtypes[2];
   npy_uint32 op_flags[] = {NPY_ITER_READONLY, NPY_ITER_READONLY};
 
   /* Parse the input tuple */
@@ -723,16 +739,19 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
 
   arrays[0] = x_array;
   arrays[1] = w_array;
+  dtypes[0] = PyArray_DescrFromType(NPY_DOUBLE);
+  dtypes[1] = PyArray_DescrFromType(NPY_DOUBLE);
   iter = NpyIter_AdvancedNew(2, arrays,
                              NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                              NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
                              -1, NULL, NULL, 0);
+  Py_DECREF(dtypes[0]);
+  Py_DECREF(dtypes[1]);
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     Py_DECREF(x_array);
     Py_DECREF(w_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -747,7 +766,6 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(x_array);
     Py_DECREF(w_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -818,7 +836,7 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   NpyIter_IterNextFunc *iternext;
   char **dataptr;
   npy_intp *strideptr, *innersizeptr;
-  PyArray_Descr *dtypes[] = {PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE), PyArray_DescrFromType(NPY_DOUBLE)};
+  PyArray_Descr *dtypes[3];
   npy_uint32 op_flags[] = {NPY_ITER_READONLY, NPY_ITER_READONLY, NPY_ITER_READONLY};
 
   /* Parse the input tuple */
@@ -880,17 +898,22 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
   arrays[0] = x_array;
   arrays[1] = y_array;
   arrays[2] = w_array;
+  dtypes[0] = PyArray_DescrFromType(NPY_DOUBLE);
+  dtypes[1] = PyArray_DescrFromType(NPY_DOUBLE);
+  dtypes[2] = PyArray_DescrFromType(NPY_DOUBLE);
   iter = NpyIter_AdvancedNew(3, arrays,
                              NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                              NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
                              -1, NULL, NULL, 0);
+  Py_DECREF(dtypes[0]);
+  Py_DECREF(dtypes[1]);
+  Py_DECREF(dtypes[2]);
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     Py_DECREF(x_array);
     Py_DECREF(y_array);
     Py_DECREF(w_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -906,7 +929,6 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
     Py_DECREF(y_array);
     Py_DECREF(w_array);
     Py_DECREF(count_obj);
-    Py_DECREF(count_array);
     return NULL;
   }
 
@@ -999,9 +1021,15 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   }
 
   ndim = (int)PyTuple_Size(sample_obj);
+  if (ndim < 0) {
+    return NULL;
+  }
 
   /* Interpret the input objects as `numpy` arrays. */
   arrays = (PyArrayObject **)malloc(sizeof(PyArrayObject *) * (ndim + 1));
+  if (arrays == NULL) {
+    return PyErr_NoMemory();
+  }
   sample_parsing_success = 1;
   for (int i = 0; i < ndim; i++){
     arrays[i] = (PyArrayObject *)PyArray_FROM_O(PyTuple_GetItem(sample_obj, i));
@@ -1052,6 +1080,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   /* copy the content of `bins` into `dims` */
   dtype = PyArray_DescrFromType(NPY_INTP);
   iter = NpyIter_New(bins, NPY_ITER_READONLY, NPY_CORDER, NPY_SAFE_CASTING, dtype);
+  Py_DECREF(dtype);
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator over binning.");
     for (int i = 0; i < ndim + 1; i++){
@@ -1118,6 +1147,7 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
   range_c = (double *)malloc(sizeof(double) * ndim * 2);
   dtype = PyArray_DescrFromType(NPY_DOUBLE);
   iter = NpyIter_New(range, NPY_ITER_READONLY, NPY_CORDER, NPY_SAFE_CASTING, dtype);
+  Py_DECREF(dtype);
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator over range. This needs to be passed as type `numpy.double`.");
     for (int i = 0; i < ndim + 1; i++){
@@ -1173,11 +1203,16 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
                              NPY_ITER_EXTERNAL_LOOP | NPY_ITER_BUFFERED,
                              NPY_KEEPORDER, NPY_SAFE_CASTING, op_flags, dtypes,
                              -1, NULL, NULL, 0);
+  for (int i = 0; i < ndim + 1; i++){
+    Py_DECREF(dtypes[i]);
+  }
   if (iter == NULL) {
     PyErr_SetString(PyExc_RuntimeError, "Couldn't set up iterator");
     for (int i = 0; i < ndim + 1; i++){
      Py_XDECREF(arrays[i]);
     }
+    Py_XDECREF(range);
+    Py_XDECREF(bins);
     Py_DECREF(count_obj);
     free(arrays);
     free(dims);
@@ -1200,6 +1235,8 @@ static PyObject *_histogramdd_weighted(PyObject *self, PyObject *args) {
     for (int i = 0; i < ndim + 1; i++){
       Py_XDECREF(arrays[i]);
     }
+    Py_XDECREF(range);
+    Py_XDECREF(bins);
     Py_DECREF(count_obj);
     free(arrays);
     free(dims);
