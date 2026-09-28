@@ -525,6 +525,37 @@ def test_invalid_list():
 
 
 @pytest.mark.parametrize("use_weights", [False, True])
+def test_histogram1d_nan_values(use_weights):
+    # Check that NaNs are considered as out of range values
+    x = np.array([np.nan])
+    weights = np.array([2.0]) if use_weights else None
+    result = histogram1d(x, bins=10, range=(0, 2), weights=weights)
+    assert not np.any(result)
+
+
+@pytest.mark.parametrize("use_weights", [False, True])
+def test_histogram2d_nan_values(use_weights):
+    x = np.array([0.5,    np.nan])
+    y = np.array([np.nan, 0.5])
+    weights = np.array([1.0, 2.0]) if use_weights else None
+    result = histogram2d(
+        x, y, bins=(10, 10), range=((0, 2), (0, 2)), weights=weights
+    )
+    assert not np.any(result)
+
+
+@pytest.mark.parametrize("use_weights", [False, True])
+def test_histogramdd_nan_values(use_weights):
+    x = np.array([np.nan, 1.5])
+    y = np.array([0.5, np.nan])
+    weights = np.array([1.0, 2.0]) if use_weights else None
+    result = histogramdd(
+        (x, y), bins=(10, 10), range=((0, 2), (0, 2)), weights=weights
+    )
+    assert not np.any(result)
+
+
+@pytest.mark.parametrize("use_weights", [False, True])
 def test_histogramdd_mismatched_lengths(use_weights):
     # Regression test for a bug where the dimension-mismatch error cleanup
     # loop used the wrong variable (arrays[i] instead of arrays[j]), causing
