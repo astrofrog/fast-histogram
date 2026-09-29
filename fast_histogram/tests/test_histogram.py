@@ -535,12 +535,10 @@ def test_histogram1d_nan_values(use_weights):
 
 @pytest.mark.parametrize("use_weights", [False, True])
 def test_histogram2d_nan_values(use_weights):
-    x = np.array([0.5,    np.nan])
+    x = np.array([0.5, np.nan])
     y = np.array([np.nan, 0.5])
     weights = np.array([1.0, 2.0]) if use_weights else None
-    result = histogram2d(
-        x, y, bins=(10, 10), range=((0, 2), (0, 2)), weights=weights
-    )
+    result = histogram2d(x, y, bins=(10, 10), range=((0, 2), (0, 2)), weights=weights)
     assert not np.any(result)
 
 
@@ -549,9 +547,7 @@ def test_histogramdd_nan_values(use_weights):
     x = np.array([np.nan, 1.5])
     y = np.array([0.5, np.nan])
     weights = np.array([1.0, 2.0]) if use_weights else None
-    result = histogramdd(
-        (x, y), bins=(10, 10), range=((0, 2), (0, 2)), weights=weights
-    )
+    result = histogramdd((x, y), bins=(10, 10), range=((0, 2), (0, 2)), weights=weights)
     assert not np.any(result)
 
 
