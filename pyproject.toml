@@ -1,11 +1,21 @@
 [build-system]
 requires = ["setuptools",
             "setuptools_scm",
+            "extension-helpers>=1.4,<2",
             "numpy>=2"]
 build-backend = 'setuptools.build_meta'
 
+[tool.extension-helpers]
+use_extension_helpers = true
+
+[tool.setuptools_scm]
+write_to = "fast_histogram/version.py"
+
+[tool.cibuildwheel]
+enable = ["pypy", "pypy-eol"]
+environment-pass = ["EXTENSION_HELPERS_PY_LIMITED_API"]
+
 [tool.cibuildwheel.linux]
-skip = "pp312*"
 archs = ["auto", "aarch64"]
 
 [tool.cibuildwheel.macos]
@@ -26,3 +36,28 @@ environment = { CC="clang" }
 [tool.isort]
 profile = "black"
 line_length = 100
+
+[[tool.cibuildwheel.overrides]]
+select = "cp311-*"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp312-*"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp313-*"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp314-*"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+[[tool.cibuildwheel.overrides]]
+select = "pp311-*"
+manylinux-pypy_x86_64-image = "manylinux_2_28"
+manylinux-pypy_aarch64-image = "manylinux_2_28"

@@ -11,7 +11,7 @@ concurrency:
 jobs:
 
   tests:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@1285b95e32c783cfa40eb2ffbd6ca4cd023fb884 # v3.2.2
     with:
       runs-on: |
         linux: ubuntu-22.04
@@ -41,7 +41,7 @@ jobs:
         - windows: py314-test-numpydev
 
   publish:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@1285b95e32c783cfa40eb2ffbd6ca4cd023fb884 # v3.2.2
     with:
       test_extras: test
       test_command: pytest --pyargs fast_histogram -m "not hypothesis"
@@ -57,21 +57,24 @@ jobs:
         - cp*-macosx_x86_64
         - cp*-macosx_arm64
         - windows
-    secrets:
-      pypi_token: ${{ secrets.PYPI_TOKEN }}
+        - cp*-pyodide_wasm32
+      env: |
+        CIBW_SKIP: "cp314t-*"
+        EXTENSION_HELPERS_PY_LIMITED_API: "cp310"
 
-  # The following is a separate job because we need to set CIBW_PLATFORM
-  # See https://github.com/OpenAstronomy/github-actions-workflows/issues/308
-
-  publish_wasm32:
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@v1
+  publish_freethreaded:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@1285b95e32c783cfa40eb2ffbd6ca4cd023fb884 # v3.2.2
     with:
       test_extras: test
       test_command: pytest --pyargs fast_histogram -m "not hypothesis"
-      sdist-runs-on: ubuntu-22.04
+      sdist: false
       targets: |
-        - cp*-pyodide_wasm32
+        - cp314t-manylinux_x86_64
+        - target: cp314t-manylinux_aarch64
+          runs-on: ubuntu-24.04-arm
+        - cp314t-musllinux_x86_64
+        - cp314t-macosx_x86_64
+        - cp314t-macosx_arm64
+        - cp314t-win*
       env: |
-        CIBW_PLATFORM: pyodide
-    secrets:
-      pypi_token: ${{ secrets.PYPI_TOKEN }}
+        EXTENSION_HELPERS_PY_LIMITED_API: ""
