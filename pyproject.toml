@@ -4,8 +4,10 @@ requires = ["setuptools",
             "numpy>=2"]
 build-backend = 'setuptools.build_meta'
 
+[tool.cibuildwheel]
+enable = ["pypy", "pypy-eol"]
+
 [tool.cibuildwheel.linux]
-skip = "pp312*"
 archs = ["auto", "aarch64"]
 
 [tool.cibuildwheel.macos]
