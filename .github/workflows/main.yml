@@ -58,3 +58,22 @@ jobs:
         - cp*-macosx_arm64
         - windows
         - cp*-pyodide_wasm32
+      env: |
+        CIBW_SKIP: "cp314t-*"
+
+  publish_freethreaded:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@1285b95e32c783cfa40eb2ffbd6ca4cd023fb884 # v3.2.2
+    with:
+      test_extras: test
+      test_command: pytest --pyargs fast_histogram -m "not hypothesis"
+      sdist: false
+      targets: |
+        - cp314t-manylinux_x86_64
+        - target: cp314t-manylinux_aarch64
+          runs-on: ubuntu-24.04-arm
+        - cp314t-musllinux_x86_64
+        - cp314t-macosx_x86_64
+        - cp314t-macosx_arm64
+        - cp314t-win*
+      env: |
+        EXTENSION_HELPERS_PY_LIMITED_API: ""

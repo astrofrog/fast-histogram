@@ -1,8 +1,15 @@
 [build-system]
 requires = ["setuptools",
             "setuptools_scm",
+            "extension-helpers",
             "numpy>=2"]
 build-backend = 'setuptools.build_meta'
+
+[tool.extension-helpers]
+use_extension_helpers = true
+
+[tool.setuptools_scm]
+write_to = "fast_histogram/version.py"
 
 [tool.cibuildwheel]
 enable = ["pypy", "pypy-eol"]
