@@ -60,6 +60,7 @@ jobs:
         - cp*-pyodide_wasm32
       env: |
         CIBW_SKIP: "cp314t-*"
+        EXTENSION_HELPERS_PY_LIMITED_API: "cp310"
 
   publish_freethreaded:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish.yml@1285b95e32c783cfa40eb2ffbd6ca4cd023fb884 # v3.2.2
