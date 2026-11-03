@@ -44,7 +44,10 @@ def test_1d_compare_with_numpy(size, nx, xmin, xmax, weights, dtype):
 
     x = values[size:]
 
-    reference = np.histogram(x, bins=nx, weights=w, range=(xmin, xmax))[0]
+    try:
+        reference = np.histogram(x, bins=nx, weights=w, range=(xmin, xmax))[0]
+    except ValueError:
+        assume(False)
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435
@@ -110,9 +113,12 @@ def test_2d_compare_with_numpy(size, nx, xmin, xmax, ny, ymin, ymax, weights, dt
     x = values[size : size * 2]
     y = values[size * 2 :]
 
-    reference = np.histogram2d(
-        x, y, bins=(nx, ny), weights=w, range=((xmin, xmax), (ymin, ymax))
-    )[0]
+    try:
+        reference = np.histogram2d(
+            x, y, bins=(nx, ny), weights=w, range=((xmin, xmax), (ymin, ymax))
+        )[0]
+    except ValueError:
+        assume(False)
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435.
@@ -179,7 +185,10 @@ def test_dd_compare_with_numpy(size, hist_size, bins, ranges, weights, dtype):
 
     sample = tuple(values[size * (i + 1) : size * (i + 2)] for i in range(ndim))
 
-    reference = np.histogramdd(sample, bins=bins, weights=w, range=ranges)[0]
+    try:
+        reference = np.histogramdd(sample, bins=bins, weights=w, range=ranges)[0]
+    except ValueError:
+        assume(False)
 
     # First, check the Numpy result because it sometimes doesn't make sense. See
     # bug report https://github.com/numpy/numpy/issues/9435.
